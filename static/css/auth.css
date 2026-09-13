@@ -1,0 +1,686 @@
+/* ==========================================================
+   LittleCare - Child Healthcare Portal
+   Pure CSS & Semantic HTML Stylesheet
+   Theme: Vibrant & Playful Graphical Pink Pediatric Healthcare
+   ========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --primary: #ec4899;         /* Vibrant Pediatric Rose/Pink */
+    --primary-light: #fdf2f8;   /* Softest Blush */
+    --primary-dark: #be185d;    /* Deep Berry Pink */
+    --primary-gradient: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #db2777 100%);
+    
+    --secondary: #10b981;       /* Mint Green */
+    --secondary-light: #ecfdf5;
+    
+    --accent-peach: #fb7185;    /* Soft Coral Peach */
+    --accent-peach-light: #ffe4e6;
+    --accent-purple: #c084fc;   /* Playful Lilac */
+    --accent-yellow: #fbbf24;   /* Sunshine Gold */
+    
+    --text-dark: #1e1b4b;       /* Deep Indigo Slate */
+    --text-muted: #64748b;      /* Slate 500 */
+    
+    --bg-pink-base: #fff1f6;    /* Soft Pink Canvas */
+    --bg-card: #ffffff;
+    
+    --border-color: #fce7f3;
+    --border-focus: #f472b6;
+    
+    --radius-lg: 28px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
+    
+    --shadow-soft: 0 20px 40px -15px rgba(236, 72, 153, 0.12);
+    --shadow-card: 0 30px 60px -15px rgba(236, 72, 153, 0.18), 0 0 1px 1px rgba(244, 114, 182, 0.1);
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ==========================================================
+   Graphical Pink Multi-Layered Background
+   ========================================================== */
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg-pink-base);
+    /* Rich Graphical Pink Theme with playful SVG patterns, bubbles & glowing orbs */
+    background-image: 
+        /* Playful Floating Plus & Sparkle Pattern */
+        url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ec4899' fill-opacity='0.07' fill-rule='evenodd'%3E%3Cpath d='M30 10h6v6h-6zM30 16h-6v6h6zM36 16h6v6h-6zM30 22h6v6h-6zM65 50h4v4h-4zM65 54h-4v4h4zM69 54h4v4h-4zM65 58h4v4h-4zM15 60a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm50-45a3 3 0 1 1 0-6 3 3 0 0 1 0 6z'/%3E%3Cpath d='M45 40l2 4 4 2-4 2-2 4-2-4-4-2 4-2z'/%3E%3C/g%3E%3C/svg%3E"),
+        /* Soft Floating Polka Dotted Grid */
+        radial-gradient(#f472b6 1px, transparent 1px),
+        /* Glowing Pastel Spheres */
+        radial-gradient(circle at 12% 15%, rgba(244, 63, 94, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 88% 18%, rgba(236, 72, 153, 0.18) 0%, transparent 42%),
+        radial-gradient(circle at 85% 82%, rgba(217, 70, 239, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 15% 85%, rgba(251, 113, 133, 0.16) 0%, transparent 40%),
+        linear-gradient(135deg, #fff5f8 0%, #fdf2f8 50%, #fce7f3 100%);
+    background-size: 80px 80px, 24px 24px, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dark);
+    padding: 24px 16px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Decorative Ambient Graphical Blobs */
+body::before,
+body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(60px);
+    z-index: 0;
+    pointer-events: none;
+    animation: pulseGlow 8s ease-in-out infinite alternate;
+}
+
+body::before {
+    width: 380px;
+    height: 380px;
+    background: rgba(244, 114, 182, 0.22);
+    top: -60px;
+    left: -60px;
+}
+
+body::after {
+    width: 420px;
+    height: 420px;
+    background: rgba(251, 113, 133, 0.2);
+    bottom: -80px;
+    right: -80px;
+    animation-delay: -4s;
+}
+
+@keyframes pulseGlow {
+    0% { transform: scale(0.95) translate(0, 0); opacity: 0.7; }
+    100% { transform: scale(1.1) translate(20px, 20px); opacity: 1; }
+}
+
+/* ==========================================================
+   Auth Main Card Container
+   ========================================================== */
+.auth-wrapper {
+    width: 100%;
+    max-width: 1120px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(252, 231, 243, 0.9);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    min-height: 680px;
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(16px);
+}
+
+/* ==========================================================
+   Left Brand Panel (Vibrant Pink Gradient + Graphical Decors)
+   ========================================================== */
+.brand-panel {
+    background: linear-gradient(150deg, #f43f5e 0%, #ec4899 45%, #db2777 80%, #be185d 100%);
+    color: #ffffff;
+    padding: 48px 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative Geometric Graphical Shapes */
+.brand-panel::before {
+    content: '';
+    position: absolute;
+    top: -90px;
+    right: -90px;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.04) 70%, transparent 100%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.brand-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    left: -80px;
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.02) 70%, transparent 100%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Top-Right Baby Footprint Heart Badge */
+.footprint-heart-badge {
+    position: absolute;
+    top: 22px;
+    right: 24px;
+    width: 105px;
+    height: 105px;
+    pointer-events: none;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.92;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: rotate(5deg);
+}
+
+.footprint-heart-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 16px rgba(190, 24, 93, 0.35)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.25));
+}
+
+.brand-panel:hover .footprint-heart-badge {
+    opacity: 1;
+    transform: rotate(9deg) scale(1.08);
+    filter: drop-shadow(0 8px 22px rgba(190, 24, 93, 0.45));
+}
+
+/* Header */
+.brand-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 2;
+}
+
+.logo-badge {
+    width: 54px;
+    height: 54px;
+    background: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.brand-title {
+    font-size: 29px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    text-shadow: 0 2px 8px rgba(190, 24, 93, 0.3);
+}
+
+.brand-tagline {
+    font-size: 13.5px;
+    opacity: 0.92;
+    font-weight: 500;
+}
+
+/* Hero Section */
+.brand-hero {
+    margin: 24px 0 26px 0;
+    z-index: 2;
+}
+
+.hero-heading {
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 0;
+    letter-spacing: -0.5px;
+}
+
+.hero-heading span {
+    color: #fef08a; /* Warm Sunshine Pop */
+    display: block;
+}
+
+.hero-desc {
+    font-size: 14.5px;
+    line-height: 1.6;
+    opacity: 0.94;
+    font-weight: 400;
+    max-width: 420px;
+}
+
+/* Feature List (Compact, Clean & Bold Without Subtext) */
+.feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 2;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    padding: 12px 18px;
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.feature-item:hover {
+    background: rgba(255, 255, 255, 0.26);
+    border-color: rgba(255, 255, 255, 0.45);
+    transform: translateX(6px);
+    box-shadow: 0 8px 20px rgba(190, 24, 93, 0.2);
+}
+
+.feature-icon {
+    width: 38px;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.feature-text h4 {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+}
+
+.brand-footer {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-top: 24px;
+    z-index: 2;
+}
+
+/* Hidden Radio Inputs for Tab Control */
+.tab-toggle {
+    display: none;
+}
+
+/* ==========================================================
+   Right Form Section
+   ========================================================== */
+.form-panel {
+    padding: 44px 42px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    background: #ffffff;
+}
+
+/* Flash Messages */
+.flash-container {
+    margin-bottom: 20px;
+}
+
+.alert {
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 13.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.alert-success {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.alert-error {
+    background: #fff1f2;
+    color: #be123c;
+    border: 1px solid #fecdd3;
+}
+
+.alert-warning {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.alert-info {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
+
+/* Pure CSS Tab Navigation */
+.auth-nav {
+    display: flex;
+    background: #fdf2f8;
+    border: 1px solid #fce7f3;
+    border-radius: var(--radius-md);
+    padding: 6px;
+    margin-bottom: 24px;
+}
+
+.nav-tab {
+    flex: 1;
+    text-align: center;
+    padding: 11px 16px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 12px;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    user-select: none;
+}
+
+.nav-tab:hover {
+    color: var(--primary-dark);
+}
+
+/* Pure CSS Tab Sibling Selectors */
+#tab-login-radio:checked ~ .form-panel .nav-tab-login {
+    background: #ffffff;
+    color: var(--primary);
+    box-shadow: 0 4px 14px rgba(236, 72, 153, 0.14);
+}
+
+#tab-register-radio:checked ~ .form-panel .nav-tab-register {
+    background: #ffffff;
+    color: var(--primary);
+    box-shadow: 0 4px 14px rgba(236, 72, 153, 0.14);
+}
+
+#tab-login-radio:checked ~ .form-panel .form-box-login {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+#tab-login-radio:checked ~ .form-panel .form-box-register {
+    display: none;
+}
+
+#tab-register-radio:checked ~ .form-panel .form-box-login {
+    display: none;
+}
+
+#tab-register-radio:checked ~ .form-panel .form-box-register {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-title {
+    font-size: 23px;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+}
+
+.form-subtitle {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 22px;
+}
+
+/* Role Selector (Pure CSS Radio Buttons) */
+.role-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.role-pill {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    background: #fff5f8;
+    transition: var(--transition);
+}
+
+.role-pill input[type="radio"] {
+    accent-color: var(--primary);
+}
+
+.role-pill:hover {
+    border-color: var(--border-focus);
+    background: #ffffff;
+    color: var(--primary);
+}
+
+/* Input Fields */
+.input-group {
+    margin-bottom: 16px;
+}
+
+.input-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 7px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    font-size: 16px;
+    color: #f472b6;
+    pointer-events: none;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-dark);
+    background: #fdfafc;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    outline: none;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    background: #ffffff;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.14);
+}
+
+/* Form Options */
+.form-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.remember-me input {
+    accent-color: var(--primary);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.forgot-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.forgot-link:hover {
+    text-decoration: underline;
+    color: var(--primary-dark);
+}
+
+/* Primary Action Buttons */
+.btn-submit {
+    width: 100%;
+    padding: 13px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    background: var(--primary-gradient);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    box-shadow: 0 10px 22px -5px rgba(236, 72, 153, 0.4);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 26px -5px rgba(236, 72, 153, 0.5);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+/* DB Mode Status Badge */
+.db-badge {
+    position: absolute;
+    bottom: 12px;
+    right: 20px;
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fdf2f8;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.db-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    display: inline-block;
+}
+
+/* Pure CSS Modal */
+.modal-target {
+    position: fixed;
+    inset: 0;
+    background: rgba(30, 27, 75, 0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+}
+
+.modal-target:target {
+    display: flex;
+}
+
+.modal-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 440px;
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    animation: modalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-close {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    font-size: 24px;
+    color: var(--text-muted);
+    text-decoration: none;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: var(--text-dark);
+}
+
+/* Responsive Media Queries */
+@media (max-width: 900px) {
+    .auth-wrapper {
+        grid-template-columns: 1fr;
+        max-width: 520px;
+    }
+    .brand-panel {
+        display: none;
+    }
+    .form-panel {
+        padding: 36px 24px;
+    }
+}
