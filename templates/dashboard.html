@@ -9,12 +9,14 @@
     <style>
         .dashboard-container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1040px;
             background: #ffffff;
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-card);
             padding: 36px 40px;
-            border: 1px solid var(--border-color);
+            border: 1px solid rgba(252, 231, 243, 0.9);
+            position: relative;
+            z-index: 1;
         }
 
         .dashboard-header {
@@ -38,14 +40,14 @@
             width: 56px;
             height: 56px;
             border-radius: 18px;
-            background: linear-gradient(135deg, var(--primary) 0%, #0d9488 100%);
+            background: var(--primary-gradient);
             color: #ffffff;
             font-size: 24px;
             font-weight: 800;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 8px 16px rgba(2, 132, 199, 0.2);
+            box-shadow: 0 8px 16px rgba(236, 72, 153, 0.25);
         }
 
         .user-info h2 {
@@ -65,88 +67,268 @@
             border-radius: 20px;
             margin-top: 4px;
             text-transform: capitalize;
+            border: 1px solid #fbcfe8;
         }
 
-        .btn-logout {
-            padding: 10px 20px;
-            background: #fee2e2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
+        .header-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-add-child-header {
+            padding: 10px 18px;
+            background: var(--primary-gradient);
+            color: #ffffff;
             border-radius: var(--radius-md);
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 700;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 6px 16px rgba(236, 72, 153, 0.3);
+            transition: var(--transition);
+        }
+
+        .btn-add-child-header:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(236, 72, 153, 0.4);
+        }
+
+        .btn-logout {
+            padding: 10px 18px;
+            background: #fff1f2;
+            color: #be123c;
+            border: 1px solid #fecdd3;
+            border-radius: var(--radius-md);
+            font-size: 13.5px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             transition: var(--transition);
         }
 
         .btn-logout:hover {
-            background: #fca5a5;
-            color: #991b1b;
+            background: #ffe4e6;
+            color: #9f1239;
         }
 
-        .success-banner {
-            background: #ecfdf5;
-            border: 1.5px solid #a7f3d0;
-            border-radius: var(--radius-md);
-            padding: 16px 20px;
-            color: #065f46;
+        /* Children Section */
+        .section-header {
             display: flex;
             align-items: center;
-            gap: 14px;
-            margin-bottom: 28px;
-            font-size: 14px;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        .grid-cards {
+        .section-header h3 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Child Cards Grid */
+        .children-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
-            margin-bottom: 32px;
+            margin-bottom: 34px;
         }
 
-        .dash-card {
-            background: #f8fafc;
-            border: 1px solid var(--border-color);
+        .child-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
             border-radius: var(--radius-md);
             padding: 22px;
             transition: var(--transition);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .child-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 14px 28px rgba(236, 72, 153, 0.12);
+        }
+
+        .child-card-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .child-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            background: var(--primary-light);
+            border: 1px solid #fbcfe8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .child-avatar.female {
+            background: #fdf2f8;
+            border-color: #f472b6;
+        }
+
+        .child-meta h4 {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+
+        .child-meta p {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .child-tags {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .tag-pill {
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 12px;
+        }
+
+        .tag-age {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid #fbcfe8;
+        }
+
+        .tag-blood {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .btn-view-healthcard {
+            width: 100%;
+            padding: 10px 14px;
+            background: #f8fafc;
+            color: var(--primary);
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .btn-view-healthcard:hover {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        /* Empty State */
+        .empty-children-card {
+            background: linear-gradient(135deg, #fdf2f8 0%, #fff5f8 100%);
+            border: 1.5px dashed #f472b6;
+            border-radius: var(--radius-md);
+            padding: 36px 24px;
+            text-align: center;
+            margin-bottom: 34px;
+        }
+
+        .empty-children-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .empty-children-card h4 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .empty-children-card p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            max-width: 440px;
+            margin: 0 auto 20px auto;
+            line-height: 1.5;
+        }
+
+        /* Quick Module Cards */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+
+        .dash-card {
+            background: #fdfafc;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .dash-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.04);
+            box-shadow: 0 12px 24px rgba(236, 72, 153, 0.08);
             border-color: var(--primary);
         }
 
         .dash-card-icon {
-            width: 44px;
-            height: 44px;
+            width: 42px;
+            height: 42px;
             border-radius: 12px;
-            background: #e0f2fe;
+            background: var(--primary-light);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
         }
 
         .dash-card h4 {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: var(--text-dark);
         }
 
         .dash-card p {
-            font-size: 13px;
+            font-size: 12.5px;
             color: var(--text-muted);
             line-height: 1.45;
         }
 
+        /* Profile Details Table */
         .profile-details {
             background: #fdfdfd;
             border: 1px solid var(--border-color);
@@ -202,9 +384,14 @@
                 </div>
             </div>
 
-            <a href="{{ url_for('logout') }}" class="btn-logout">
-                <span>🚪</span> Sign Out
-            </a>
+            <div class="header-btn-group">
+                <a href="{{ url_for('add_child') }}" class="btn-add-child-header">
+                    <span>➕</span> Add Child Profile
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn-logout">
+                    <span>🚪</span> Sign Out
+                </a>
+            </div>
         </div>
 
         <!-- Flash Messages on Dashboard -->
@@ -226,17 +413,71 @@
             {% endif %}
         {% endwith %}
 
-        <!-- Quick Healthcare Modules Cards -->
+        <!-- 1. REGISTERED CHILDREN SECTION -->
+        <div class="section-header">
+            <h3>👶 Registered Children ({{ children|length }})</h3>
+            {% if children %}
+                <a href="{{ url_for('add_child') }}" style="font-size: 13.5px; color: var(--primary); font-weight: 700; text-decoration: none;">
+                    + Register Another Child
+                </a>
+            {% endif %}
+        </div>
+
+        {% if children %}
+            <div class="children-grid">
+                {% for child in children %}
+                    <div class="child-card">
+                        <div>
+                            <div class="child-card-top">
+                                <div class="child-avatar {% if child.gender == 'female' %}female{% endif %}">
+                                    {% if child.gender == 'female' %}👧{% elif child.gender == 'male' %}👦{% else %}👶{% endif %}
+                                </div>
+                                <div class="child-meta">
+                                    <h4>{{ child.name }}</h4>
+                                    <p>Born: {{ child.dob }}</p>
+                                </div>
+                            </div>
+
+                            <div class="child-tags">
+                                <span class="tag-pill tag-age">🎂 {{ child.display_age }}</span>
+                                {% if child.blood_group %}
+                                    <span class="tag-pill tag-blood">🩸 {{ child.blood_group }}</span>
+                                {% endif %}
+                                {% if child.allergies %}
+                                    <span class="tag-pill" style="background: #fff1f2; color: #be123c; border: 1px solid #fecdd3;">⚠️ Allergy Alert</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <a href="{{ url_for('child_detail', child_id=child.id) }}" class="btn-view-healthcard">
+                            <span>View Health Card</span>
+                            <span>➔</span>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-children-card">
+                <div class="empty-children-icon">👶</div>
+                <h4>No Child Profiles Added Yet!</h4>
+                <p>Register your child's profile to track automated immunization schedules, growth milestones, and medical history.</p>
+                <a href="{{ url_for('add_child') }}" class="btn-submit" style="display: inline-flex; width: auto; padding: 12px 28px; text-decoration: none;">
+                    <span>➕</span>
+                    <span>Add Child Profile Now</span>
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- 2. QUICK HEALTHCARE MODULES OVERVIEW -->
+        <div class="section-header" style="margin-top: 10px;">
+            <h3>🚀 Healthcare Modules</h3>
+        </div>
+
         <div class="grid-cards">
             <div class="dash-card">
-                <div class="dash-card-icon">👶</div>
-                <h4>Child Health Profile</h4>
-                <p>Manage child demographics, date of birth, blood group, and allergy history.</p>
-            </div>
-
-            <div class="dash-card">
                 <div class="dash-card-icon">💉</div>
-                <h4>Immunization Records</h4>
+                <h4>Smart Vaccination Tracker</h4>
                 <p>Track age-wise vaccine milestones, completed doses, and upcoming schedules.</p>
             </div>
 
@@ -251,9 +492,15 @@
                 <h4>Doctor Appointments</h4>
                 <p>Schedule consultations with pediatricians and view booked appointments.</p>
             </div>
+
+            <div class="dash-card">
+                <div class="dash-card-icon">🥗</div>
+                <h4>Nutrition &amp; Meal Plans</h4>
+                <p>Age-tailored infant nutrition guides and wholesome recipe ideas.</p>
+            </div>
         </div>
 
-        <!-- User Profile Information Card -->
+        <!-- 3. USER PROFILE INFORMATION CARD -->
         <div class="profile-details">
             <h3>👤 Account Information</h3>
             <div class="detail-row">

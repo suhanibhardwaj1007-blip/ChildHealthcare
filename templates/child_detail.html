@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ child.name }} | Child Health Card - LittleCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👶</text></svg>">
+    <style>
+        .child-page-container {
+            width: 100%;
+            max-width: 960px;
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(252, 231, 243, 0.9);
+            padding: 36px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .child-page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 26px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn-back {
+            padding: 9px 16px;
+            background: #f8fafc;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 13.5px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .btn-back:hover {
+            background: #ffffff;
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-delete-child {
+            padding: 9px 16px;
+            background: #fff1f2;
+            color: #be123c;
+            border: 1px solid #fecdd3;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .btn-delete-child:hover {
+            background: #ffe4e6;
+            color: #9f1239;
+        }
+
+        /* Hero Digital Health Card */
+        .health-card-hero {
+            background: linear-gradient(135deg, #fdf2f8 0%, #fff1f6 50%, #fce7f3 100%);
+            border: 1.5px solid #fbcfe8;
+            border-radius: var(--radius-lg);
+            padding: 28px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .health-card-hero::after {
+            content: '👶';
+            position: absolute;
+            right: -15px;
+            bottom: -20px;
+            font-size: 110px;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+
+        .child-identity {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 1;
+        }
+
+        .child-avatar-big {
+            width: 72px;
+            height: 72px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #f43f5e 0%, #ec4899 100%);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            box-shadow: 0 10px 20px -5px rgba(236, 72, 153, 0.35);
+            border: 2px solid #ffffff;
+        }
+
+        .child-avatar-big.female {
+            background: linear-gradient(135deg, #ec4899 0%, #d946ef 100%);
+        }
+
+        .child-name-group h2 {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+
+        .child-badges {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12.5px;
+            font-weight: 700;
+        }
+
+        .badge-age {
+            background: #ffffff;
+            color: var(--primary);
+            border: 1px solid #fbcfe8;
+            box-shadow: 0 2px 6px rgba(236, 72, 153, 0.1);
+        }
+
+        .badge-blood {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .badge-gender {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+
+        /* Stats Grid */
+        .stats-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: #fdfafc;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px 22px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-focus);
+            background: #ffffff;
+            box-shadow: 0 8px 20px rgba(236, 72, 153, 0.08);
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .stat-content h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text-dark);
+        }
+
+        /* Details Sections */
+        .details-box {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            margin-bottom: 28px;
+        }
+
+        .details-box h3 {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #f8fafc;
+            font-size: 14px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            width: 200px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .info-val {
+            font-weight: 600;
+            color: var(--text-dark);
+            flex: 1;
+        }
+
+        .alert-allergies {
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #be123c;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13.5px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-safe {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13.5px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Modules Launchpad */
+        .modules-launchpad {
+            margin-top: 24px;
+        }
+
+        .modules-launchpad h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+        }
+
+        .launch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .launch-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .launch-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(236, 72, 153, 0.12);
+        }
+
+        .launch-icon {
+            font-size: 26px;
+        }
+
+        .launch-card h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .launch-card p {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="child-page-container">
+        
+        <!-- Header -->
+        <div class="child-page-header">
+            <a href="{{ url_for('dashboard') }}" class="btn-back">
+                <span>←</span> Back to Dashboard
+            </a>
+
+            <div class="header-actions">
+                <form method="POST" action="{{ url_for('delete_child', child_id=child.id) }}" onsubmit="return confirm('Are you sure you want to delete this child profile? This action cannot be undone.');">
+                    <button type="submit" class="btn-delete-child">
+                        <span>🗑️</span> Delete Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span class="alert-icon">
+                                {% if category == 'success' %}🎉
+                                {% elif category == 'error' %}⚠️
+                                {% else %}ℹ️{% endif %}
+                            </span>
+                            <span class="alert-text">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Hero Digital Health Card -->
+        <div class="health-card-hero">
+            <div class="child-identity">
+                <div class="child-avatar-big {% if child.gender == 'female' %}female{% endif %}">
+                    {% if child.gender == 'female' %}👧{% elif child.gender == 'male' %}👦{% else %}👶{% endif %}
+                </div>
+                <div class="child-name-group">
+                    <h2>{{ child.name }}</h2>
+                    <div class="child-badges">
+                        <span class="badge-pill badge-age">🎂 {{ child.display_age }}</span>
+                        <span class="badge-pill badge-gender">
+                            {% if child.gender == 'female' %}👧 Girl{% elif child.gender == 'male' %}👦 Boy{% else %}👶 Other{% endif %}
+                        </span>
+                        {% if child.blood_group %}
+                            <span class="badge-pill badge-blood">🩸 {{ child.blood_group }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid-3">
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-content">
+                    <h4>Date of Birth</h4>
+                    <div class="stat-value">{{ child.dob }}</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">⚖️</div>
+                <div class="stat-content">
+                    <h4>Birth Weight</h4>
+                    <div class="stat-value">{{ child.birth_weight_kg ~ ' kg' if child.birth_weight_kg else 'Not recorded' }}</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📏</div>
+                <div class="stat-content">
+                    <h4>Birth Height</h4>
+                    <div class="stat-value">{{ child.birth_height_cm ~ ' cm' if child.birth_height_cm else 'Not recorded' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Allergies & Health Notes -->
+        <div class="details-box">
+            <h3>🛡️ Allergy &amp; Medical Alerts</h3>
+            {% if child.allergies %}
+                <div class="alert-allergies">
+                    <span style="font-size: 20px;">⚠️</span>
+                    <div>
+                        <strong>Known Allergies / Sensitivities:</strong>
+                        <p style="margin-top: 2px;">{{ child.allergies }}</p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert-safe">
+                    <span>✅</span>
+                    <span>No known drug or dietary allergies recorded for this child.</span>
+                </div>
+            {% endif %}
+
+            {% if child.medical_notes %}
+                <div style="margin-top: 18px;">
+                    <h4 style="font-size: 13.5px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px;">📝 Pediatric Notes / Birth History:</h4>
+                    <p style="font-size: 14px; color: var(--text-muted); background: #fdfafc; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        {{ child.medical_notes }}
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Health Trackers Launchpad for this Child -->
+        <div class="modules-launchpad">
+            <h3>🚀 Health Modules for {{ child.name }}</h3>
+            <div class="launch-grid">
+                <div class="launch-card">
+                    <div class="launch-icon">💉</div>
+                    <h4>Smart Vaccination Tracker</h4>
+                    <p>Age-wise automated vaccine schedule from birth to 12+ years based on date of birth.</p>
+                </div>
+
+                <div class="launch-card">
+                    <div class="launch-icon">📈</div>
+                    <h4>Growth &amp; BMI Monitor</h4>
+                    <p>Log periodic height and weight against WHO pediatric growth standard curves.</p>
+                </div>
+
+                <div class="launch-card">
+                    <div class="launch-icon">🩺</div>
+                    <h4>Doctor Appointments</h4>
+                    <p>Schedule specialist pediatric consultations and maintain clinical records.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

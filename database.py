@@ -42,6 +42,7 @@ class DatabaseManager:
             # 2. Connect to the database and create tables
             conn = self._get_mysql_connection(select_db=True)
             with conn.cursor() as cursor:
+                # Users table
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS users (
                         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -58,8 +59,28 @@ class DatabaseManager:
                         INDEX idx_role (role)
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
                 """)
+                # Children table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS children (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        parent_id INT NOT NULL,
+                        name VARCHAR(100) NOT NULL,
+                        dob DATE NOT NULL,
+                        gender ENUM('male', 'female', 'other') NOT NULL DEFAULT 'male',
+                        blood_group VARCHAR(10) DEFAULT NULL,
+                        birth_weight_kg DECIMAL(5,2) DEFAULT NULL,
+                        birth_height_cm DECIMAL(5,2) DEFAULT NULL,
+                        allergies TEXT DEFAULT NULL,
+                        medical_notes TEXT DEFAULT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                        FOREIGN KEY (parent_id) REFERENCES users(id) ON DELETE CASCADE,
+                        INDEX idx_parent_id (parent_id),
+                        INDEX idx_child_dob (dob)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                """)
             conn.close()
-            logger.info("Successfully connected to MySQL and verified 'users' table!")
+            logger.info("Successfully connected to MySQL and verified 'users' & 'children' tables!")
             self.use_sqlite = False
         except Exception as e:
             logger.warning(f"MySQL connection unavailable ({e}). Initializing SQLite fallback for seamless testing...")
@@ -84,6 +105,23 @@ class DatabaseManager:
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS children (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                parent_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                dob TEXT NOT NULL,
+                gender TEXT NOT NULL DEFAULT 'male',
+                blood_group TEXT,
+                birth_weight_kg REAL,
+                birth_height_cm REAL,
+                allergies TEXT,
+                medical_notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (parent_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        """)
         conn.commit()
         conn.close()
         logger.info(f"SQLite fallback database initialized at: {self.sqlite_file}")
@@ -101,6 +139,8 @@ class DatabaseManager:
                 logger.error(f"MySQL connection lost ({e}). Falling back to SQLite.")
                 self.use_sqlite = True
                 return self.get_connection()
+
+    # ----------------- USER METHODS ----------------- #
 
     def get_user_by_email(self, email):
         """Fetches user details by email address"""
@@ -145,16 +185,93 @@ class DatabaseManager:
                     VALUES (?, ?, ?, ?, ?)
                 """, (full_name.strip(), email.strip().lower(), phone.strip() if phone else None, password_hash, role))
                 conn.commit()
-                user_id = cursor.lastrowid
-                return user_id
+                return cursor.lastrowid
             else:
                 with conn.cursor() as cursor:
                     cursor.execute("""
                         INSERT INTO users (full_name, email, phone, password_hash, role)
                         VALUES (%s, %s, %s, %s, %s)
                     """, (full_name.strip(), email.strip().lower(), phone.strip() if phone else None, password_hash, role))
-                    user_id = cursor.lastrowid
-                    return user_id
+                    return cursor.lastrowid
+        finally:
+            conn.close()
+
+    # ----------------- CHILDREN METHODS ----------------- #
+
+    def create_child(self, parent_id, name, dob, gender='male', blood_group=None, 
+                     birth_weight_kg=None, birth_height_cm=None, allergies=None, medical_notes=None):
+        """Creates a new child profile linked to parent"""
+        conn = self.get_connection()
+        try:
+            if self.use_sqlite:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO children (parent_id, name, dob, gender, blood_group, birth_weight_kg, birth_height_cm, allergies, medical_notes)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (parent_id, name.strip(), str(dob), gender, blood_group, birth_weight_kg, birth_height_cm, allergies, medical_notes))
+                conn.commit()
+                return cursor.lastrowid
+            else:
+                with conn.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO children (parent_id, name, dob, gender, blood_group, birth_weight_kg, birth_height_cm, allergies, medical_notes)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """, (parent_id, name.strip(), str(dob), gender, blood_group, birth_weight_kg, birth_height_cm, allergies, medical_notes))
+                    return cursor.lastrowid
+        finally:
+            conn.close()
+
+    def get_children_by_parent(self, parent_id):
+        """Retrieves all registered children for a specific parent"""
+        conn = self.get_connection()
+        try:
+            if self.use_sqlite:
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM children WHERE parent_id = ? ORDER BY created_at DESC", (parent_id,))
+                rows = cursor.fetchall()
+                return [dict(row) for row in rows]
+            else:
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT * FROM children WHERE parent_id = %s ORDER BY created_at DESC", (parent_id,))
+                    return cursor.fetchall()
+        finally:
+            conn.close()
+
+    def get_child_by_id(self, child_id, parent_id=None):
+        """Retrieves single child by ID, optionally validating parent ownership"""
+        conn = self.get_connection()
+        try:
+            if self.use_sqlite:
+                cursor = conn.cursor()
+                if parent_id:
+                    cursor.execute("SELECT * FROM children WHERE id = ? AND parent_id = ?", (child_id, parent_id))
+                else:
+                    cursor.execute("SELECT * FROM children WHERE id = ?", (child_id,))
+                row = cursor.fetchone()
+                return dict(row) if row else None
+            else:
+                with conn.cursor() as cursor:
+                    if parent_id:
+                        cursor.execute("SELECT * FROM children WHERE id = %s AND parent_id = %s", (child_id, parent_id))
+                    else:
+                        cursor.execute("SELECT * FROM children WHERE id = %s", (child_id,))
+                    return cursor.fetchone()
+        finally:
+            conn.close()
+
+    def delete_child(self, child_id, parent_id):
+        """Deletes a child record ensuring parent ownership"""
+        conn = self.get_connection()
+        try:
+            if self.use_sqlite:
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM children WHERE id = ? AND parent_id = ?", (child_id, parent_id))
+                conn.commit()
+                return cursor.rowcount > 0
+            else:
+                with conn.cursor() as cursor:
+                    cursor.execute("DELETE FROM children WHERE id = %s AND parent_id = %s", (child_id, parent_id))
+                    return cursor.rowcount > 0
         finally:
             conn.close()
 

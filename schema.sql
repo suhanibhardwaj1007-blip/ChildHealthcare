@@ -25,5 +25,21 @@ CREATE TABLE IF NOT EXISTS users (
     INDEX idx_role (role)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Initial Demo Parent and Doctor (Optional Seed)
--- Passwords will be securely hashed when users register via the web interface.
+-- 2. Children Table (Child Health Profiles linked to Parent)
+CREATE TABLE IF NOT EXISTS children (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    parent_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    dob DATE NOT NULL,
+    gender ENUM('male', 'female', 'other') NOT NULL DEFAULT 'male',
+    blood_group VARCHAR(10) DEFAULT NULL,
+    birth_weight_kg DECIMAL(5,2) DEFAULT NULL,
+    birth_height_cm DECIMAL(5,2) DEFAULT NULL,
+    allergies TEXT DEFAULT NULL,
+    medical_notes TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (parent_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_parent_id (parent_id),
+    INDEX idx_child_dob (dob)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

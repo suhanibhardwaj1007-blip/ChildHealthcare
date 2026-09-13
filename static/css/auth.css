@@ -250,14 +250,6 @@ body::after {
     display: block;
 }
 
-.hero-desc {
-    font-size: 14.5px;
-    line-height: 1.6;
-    opacity: 0.94;
-    font-weight: 400;
-    max-width: 420px;
-}
-
 /* Feature List (Compact, Clean & Bold Without Subtext) */
 .feature-list {
     display: flex;
