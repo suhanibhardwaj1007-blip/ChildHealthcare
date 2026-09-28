@@ -12,11 +12,12 @@ A comprehensive, end-to-end pediatric child healthcare web application built wit
 - Role selection: **Parent / Guardian** or **Pediatrician Specialist**.
 - Pure CSS "Forgot Password" modal & real-time flash alerts.
 
-### 2. 👶 Child Profile & Digital Health Card (`/children/add`, `/children/<id>`, `/dashboard`)
-- Register child profiles with DOB, gender, blood group, birth weight/height, allergies, and birth history.
+### 2. 👶 Child Profile & Digital Health Card (`/children/add`, `/children/<id>`, `/children/<id>/edit`, `/dashboard`)
+- Register and edit child profiles with DOB, gender, blood group, birth weight/height, allergies, and birth history.
 - Automatic **human-readable age breakdown algorithm** (e.g. *"1 yr, 4 mos"*, *"8 months old"*, *"42 days old"*).
-- Interactive **Digital Health Card** with allergy warning banners and physical stat badges.
-- **Parent Data Isolation**: Strictly enforces that parents can only access and manage their own children.
+- Interactive **Digital Health Card** with "✏️ Edit Profile" quick action, allergy warning banners, and physical stat badges.
+- **Dynamic Vaccine Schedule Recalculation**: If a child's DOB is updated, non-completed vaccination due dates automatically recalculate based on standard IAP/WHO timelines.
+- **Parent Data Isolation**: Strictly enforces that parents can only access and edit their own children.
 
 ### 3. 💉 Smart Vaccination & Immunization Tracker (`/vaccination`, `/vaccination/<id>/toggle`)
 - Automated immunization schedule generated upon child creation from the **25 IAP/WHO standard vaccines**.
@@ -94,10 +95,10 @@ ChildHealthcare/
 
 ---
 
-## 🧪 Run Automated Test Suite (23 Tests)
+## 🧪 Run Automated Test Suite (27 Tests)
 
-Run all 23 tests across authentication, profiles, vaccinations, growth, appointments, and security:
+Run all 27 tests across authentication, profiles, edit capabilities, vaccinations, growth, appointments, and security:
 ```bash
 python -m unittest test_all_modules.py test_auth.py test_child_profile.py -v
 ```
-All 23 tests will execute with **`OK` (100% Pass)**.
+All 27 tests will execute with **`OK` (100% Pass)**.

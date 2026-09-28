@@ -304,6 +304,84 @@ def child_detail(child_id):
 
     return render_template('child_detail.html', user=user, child=child, db_mode=db_mode)
 
+@app.route('/children/<int:child_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_child(child_id):
+    user = db_manager.get_user_by_id(session['user_id'])
+    child = db_manager.get_child_by_id(child_id, parent_id=user['id'])
+    db_mode = "SQLite (Local Mode)" if db_manager.use_sqlite else "MySQL Database"
+
+    if not child:
+        flash("Child profile not found or access denied.", 'error')
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        dob_str = request.form.get('dob', '').strip()
+        gender = request.form.get('gender', 'male').strip().lower()
+        blood_group = request.form.get('blood_group', '').strip()
+        birth_weight = request.form.get('birth_weight_kg', '').strip()
+        birth_height = request.form.get('birth_height_cm', '').strip()
+        allergies = request.form.get('allergies', '').strip()
+        medical_notes = request.form.get('medical_notes', '').strip()
+
+        if not name:
+            flash("Please enter the child's full name.", 'error')
+            return render_template('edit_child.html', user=user, child=child, db_mode=db_mode, form_data=request.form)
+
+        if not dob_str:
+            flash("Please enter the child's date of birth.", 'error')
+            return render_template('edit_child.html', user=user, child=child, db_mode=db_mode, form_data=request.form)
+
+        try:
+            dob_date = datetime.strptime(dob_str, '%Y-%m-%d').date()
+            if dob_date > date.today():
+                flash("Date of birth cannot be in the future.", 'error')
+                return render_template('edit_child.html', user=user, child=child, db_mode=db_mode, form_data=request.form)
+        except ValueError:
+            flash("Invalid date format. Please use YYYY-MM-DD.", 'error')
+            return render_template('edit_child.html', user=user, child=child, db_mode=db_mode, form_data=request.form)
+
+        if gender not in ['male', 'female', 'other']:
+            gender = 'male'
+
+        weight_val = float(birth_weight) if birth_weight else None
+        height_val = float(birth_height) if birth_height else None
+
+        try:
+            success = db_manager.update_child(
+                child_id=child['id'],
+                parent_id=user['id'],
+                name=name,
+                dob=dob_str,
+                gender=gender,
+                blood_group=blood_group if blood_group else None,
+                birth_weight_kg=weight_val,
+                birth_height_cm=height_val,
+                allergies=allergies if allergies else None,
+                medical_notes=medical_notes if medical_notes else None
+            )
+
+            if success:
+                flash(f"Child profile for '{name}' updated successfully! ✨", 'success')
+            else:
+                flash("Failed to update child profile.", 'error')
+
+            return redirect(url_for('child_detail', child_id=child['id']))
+
+        except Exception as e:
+            app.logger.error(f"Error updating child: {e}")
+            flash("Failed to update child record. Please try again.", 'error')
+            return render_template('edit_child.html', user=user, child=child, db_mode=db_mode, form_data=request.form)
+
+    # Convert DOB to string format YYYY-MM-DD
+    if isinstance(child['dob'], (date, datetime)):
+        child['dob'] = child['dob'].strftime('%Y-%m-%d')
+    elif isinstance(child['dob'], str):
+        child['dob'] = child['dob'][:10]
+
+    return render_template('edit_child.html', user=user, child=child, db_mode=db_mode, today_date=date.today().isoformat())
+
 @app.route('/children/<int:child_id>/delete', methods=['POST'])
 @login_required
 def delete_child(child_id):

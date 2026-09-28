@@ -503,6 +503,94 @@ class DatabaseManager:
         finally:
             conn.close()
 
+    def update_child(self, child_id, parent_id, name, dob, gender='male', blood_group=None,
+                     birth_weight_kg=None, birth_height_cm=None, allergies=None, medical_notes=None):
+        """Updates child profile details and recalculates vaccine schedules if DOB changes"""
+        conn = self.get_connection()
+        try:
+            old_child = self.get_child_by_id(child_id, parent_id)
+            if not old_child:
+                return False
+
+            old_dob_str = str(old_child['dob'])[:10]
+            new_dob_str = str(dob)[:10]
+
+            if self.use_sqlite:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    UPDATE children 
+                    SET name = ?, dob = ?, gender = ?, blood_group = ?, 
+                        birth_weight_kg = ?, birth_height_cm = ?, allergies = ?, medical_notes = ?,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ? AND parent_id = ?
+                """, (name.strip(), new_dob_str, gender, blood_group, birth_weight_kg, birth_height_cm, allergies, medical_notes, child_id, parent_id))
+                conn.commit()
+                updated = cursor.rowcount > 0
+            else:
+                with conn.cursor() as cursor:
+                    cursor.execute("""
+                        UPDATE children 
+                        SET name = %s, dob = %s, gender = %s, blood_group = %s, 
+                            birth_weight_kg = %s, birth_height_cm = %s, allergies = %s, medical_notes = %s
+                        WHERE id = %s AND parent_id = %s
+                    """, (name.strip(), new_dob_str, gender, blood_group, birth_weight_kg, birth_height_cm, allergies, medical_notes, child_id, parent_id))
+                    updated = cursor.rowcount > 0
+
+            # If date of birth changed, recalculate pending vaccine schedule due dates
+            if updated and old_dob_str != new_dob_str:
+                self._recalculate_pending_vaccine_due_dates(child_id, new_dob_str)
+
+            return updated
+        finally:
+            conn.close()
+
+    def _recalculate_pending_vaccine_due_dates(self, child_id, new_dob_str):
+        """Updates due dates of non-completed vaccines when child DOB is modified"""
+        conn = self.get_connection()
+        try:
+            new_dob_date = datetime.strptime(new_dob_str[:10], '%Y-%m-%d').date()
+            today = date.today()
+
+            if self.use_sqlite:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT cv.id, vm.recommended_age_weeks 
+                    FROM child_vaccinations cv
+                    JOIN vaccines_master vm ON cv.vaccine_id = vm.id
+                    WHERE cv.child_id = ? AND cv.status != 'completed'
+                """, (child_id,))
+                rows = cursor.fetchall()
+                for r in rows:
+                    new_due = new_dob_date + timedelta(weeks=r['recommended_age_weeks'])
+                    new_status = 'overdue' if new_due < today else 'pending'
+                    cursor.execute("""
+                        UPDATE child_vaccinations 
+                        SET due_date = ?, status = ?
+                        WHERE id = ?
+                    """, (str(new_due), new_status, r['id']))
+                conn.commit()
+            else:
+                with conn.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT cv.id, vm.recommended_age_weeks 
+                        FROM child_vaccinations cv
+                        JOIN vaccines_master vm ON cv.vaccine_id = vm.id
+                        WHERE cv.child_id = %s AND cv.status != 'completed'
+                    """, (child_id,))
+                    rows = cursor.fetchall()
+                    for r in rows:
+                        new_due = new_dob_date + timedelta(weeks=r['recommended_age_weeks'])
+                        new_status = 'overdue' if new_due < today else 'pending'
+                        cursor.execute("""
+                            UPDATE child_vaccinations 
+                            SET due_date = %s, status = %s
+                            WHERE id = %s
+                        """, (str(new_due), new_status, r['id']))
+        except Exception as e:
+            logger.error(f"Error recalculating vaccine due dates: {e}")
+        finally:
+            conn.close()
+
     # ----------------- VACCINATION METHODS ----------------- #
 
     def get_master_vaccines(self):

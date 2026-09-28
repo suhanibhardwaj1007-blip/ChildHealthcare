@@ -493,10 +493,15 @@
                             {% endif %}
                         </div>
 
-                        <a href="{{ url_for('child_detail', child_id=child.id) }}" class="btn-view-healthcard">
-                            <span>View Health Card &amp; Schedule</span>
-                            <span>➔</span>
-                        </a>
+                        <div style="display: flex; gap: 8px; margin-top: 10px;">
+                            <a href="{{ url_for('child_detail', child_id=child.id) }}" class="btn-view-healthcard" style="flex: 1;">
+                                <span>View Health Card</span>
+                                <span>➔</span>
+                            </a>
+                            <a href="{{ url_for('edit_child', child_id=child.id) }}" class="btn-back" style="padding: 10px 14px; font-size: 13px;" title="Edit Profile">
+                                <span>✏️</span>
+                            </a>
+                        </div>
                     </div>
                 {% endfor %}
             </div>

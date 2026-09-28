@@ -150,5 +150,102 @@ class ChildProfileTestCase(unittest.TestCase):
         self.assertEqual(len(remaining), 0)
         print("PASS: Child profile deleted successfully.")
 
+    def test_09_render_edit_child_form(self):
+        """Test GET /children/<id>/edit renders the edit form with pre-filled data"""
+        self.client.post('/children/add', data={
+            'name': 'Aarav Original',
+            'dob': '2024-05-10',
+            'gender': 'male',
+            'blood_group': 'O+'
+        }, follow_redirects=True)
+
+        user = db_manager.get_user_by_email(self.parent_email)
+        children = db_manager.get_children_by_parent(user['id'])
+        child_id = children[0]['id']
+
+        response = self.client.get(f'/children/{child_id}/edit')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Edit Child Profile', response.data)
+        self.assertIn(b'Aarav Original', response.data)
+        self.assertIn(b'2024-05-10', response.data)
+        print("PASS: Edit child profile form renders with pre-filled data.")
+
+    def test_10_update_child_success(self):
+        """Test POST /children/<id>/edit updates child details successfully"""
+        self.client.post('/children/add', data={
+            'name': 'Aarav Sharma',
+            'dob': '2024-05-10',
+            'gender': 'male',
+            'blood_group': 'O+'
+        }, follow_redirects=True)
+
+        user = db_manager.get_user_by_email(self.parent_email)
+        children = db_manager.get_children_by_parent(user['id'])
+        child_id = children[0]['id']
+
+        # Update child details
+        response = self.client.post(f'/children/{child_id}/edit', data={
+            'name': 'Aarav S. Sharma',
+            'dob': '2024-05-12',
+            'gender': 'male',
+            'blood_group': 'AB+',
+            'birth_weight_kg': '3.6',
+            'birth_height_cm': '52.0',
+            'allergies': 'Peanut allergy',
+            'medical_notes': 'Updated pediatric notes'
+        }, follow_redirects=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Aarav S. Sharma', response.data)
+        self.assertIn(b'Peanut allergy', response.data)
+        self.assertIn(b'updated successfully', response.data)
+
+        # Verify in DB
+        updated_child = db_manager.get_child_by_id(child_id, parent_id=user['id'])
+        self.assertEqual(updated_child['name'], 'Aarav S. Sharma')
+        self.assertEqual(str(updated_child['dob'])[:10], '2024-05-12')
+        self.assertEqual(updated_child['blood_group'], 'AB+')
+        self.assertEqual(updated_child['birth_weight_kg'], 3.6)
+        print("PASS: Child profile updated successfully and reflected in database.")
+
+    def test_11_update_child_unauthorized_parent_blocked(self):
+        """Test that Parent B cannot edit Parent A's child profile"""
+        self.client.post('/children/add', data={
+            'name': 'Parent A Child',
+            'dob': '2024-03-01',
+            'gender': 'female'
+        }, follow_redirects=True)
+
+        user_a = db_manager.get_user_by_email(self.parent_email)
+        child_id = db_manager.get_children_by_parent(user_a['id'])[0]['id']
+
+        # Log in as Parent B
+        self.client.get('/logout', follow_redirects=True)
+        parent_b_email = f"parent.b2.{int(time.time()*1000)}@example.com"
+        self.client.post('/register', data={
+            'full_name': 'Parent B2',
+            'email': parent_b_email,
+            'password': 'SecurePassword123',
+            'confirm_password': 'SecurePassword123',
+            'role': 'parent'
+        }, follow_redirects=True)
+
+        # Try to GET edit page
+        res_get = self.client.get(f'/children/{child_id}/edit', follow_redirects=True)
+        self.assertIn(b'Child profile not found or access denied', res_get.data)
+
+        # Try to POST edit update
+        res_post = self.client.post(f'/children/{child_id}/edit', data={
+            'name': 'Hacked Name',
+            'dob': '2024-03-01',
+            'gender': 'female'
+        }, follow_redirects=True)
+        self.assertIn(b'Child profile not found or access denied', res_post.data)
+
+        # Verify child name was not modified
+        original_child = db_manager.get_child_by_id(child_id, parent_id=user_a['id'])
+        self.assertEqual(original_child['name'], 'Parent A Child')
+        print("PASS: Unauthorized parent cannot edit another user's child profile.")
+
 if __name__ == '__main__':
     unittest.main()

@@ -92,6 +92,41 @@ class LittleCareAllModulesTest(unittest.TestCase):
         self.assertEqual(summary['total'], 25)
         self.assertEqual(summary['completed'], 0)
 
+    # 2b. Edit Child Profile Tests
+    def test_edit_child_profile(self):
+        self.register_and_login()
+        self.add_child("Kavya", "2025-08-01", "female")
+        child = db_manager.get_children_by_parent(1)[0]
+
+        # GET edit page
+        res_get = self.client.get(f'/children/{child["id"]}/edit')
+        self.assertEqual(res_get.status_code, 200)
+        self.assertIn(b"Edit Child Profile", res_get.data)
+        self.assertIn(b"Kavya", res_get.data)
+
+        # POST edit update
+        res_post = self.client.post(f'/children/{child["id"]}/edit', data={
+            'name': 'Kavya Verma',
+            'dob': '2025-08-05',
+            'gender': 'female',
+            'blood_group': 'A+',
+            'birth_weight_kg': '3.5',
+            'birth_height_cm': '51.5',
+            'allergies': 'Dust sensitivity',
+            'medical_notes': 'Normal milestones'
+        }, follow_redirects=True)
+
+        self.assertEqual(res_post.status_code, 200)
+        self.assertIn(b"Kavya Verma", res_post.data)
+        self.assertIn(b"Dust sensitivity", res_post.data)
+
+        # Verify DB values
+        updated = db_manager.get_child_by_id(child['id'], parent_id=1)
+        self.assertEqual(updated['name'], 'Kavya Verma')
+        self.assertEqual(str(updated['dob'])[:10], '2025-08-05')
+        self.assertEqual(updated['blood_group'], 'A+')
+        self.assertEqual(updated['birth_weight_kg'], 3.5)
+
     # 3. Vaccination Tracker & Toggle Status
     def test_vaccination_tracker_and_toggle(self):
         self.register_and_login()
