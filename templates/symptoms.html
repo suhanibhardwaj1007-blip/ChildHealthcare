@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symptom Checker &amp; First Aid | LittleCare Child Healthcare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩹</text></svg>">
+    <style>
+        .page-shell {
+            width: 100%;
+            max-width: 1080px;
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(252, 231, 243, 0.9);
+            padding: 36px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .first-aid-step-card {
+            background: #fdfafc;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 22px;
+            margin-bottom: 20px;
+        }
+
+        .step-pill-badge {
+            background: var(--primary);
+            color: #ffffff;
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-shell">
+        
+        <!-- App Navigation Header -->
+        <div class="app-header-nav">
+            <a href="{{ url_for('dashboard') }}" class="brand-nav-logo">
+                <div class="brand-nav-icon">👶</div>
+                <div class="brand-nav-text">
+                    <h2>LittleCare</h2>
+                    <span>Pediatric Portal</span>
+                </div>
+            </a>
+
+            <div class="nav-links-bar">
+                <a href="{{ url_for('dashboard') }}" class="nav-link-btn">
+                    <span>🏠</span> Dashboard
+                </a>
+                <a href="{{ url_for('vaccination_tracker') }}" class="nav-link-btn">
+                    <span>💉</span> Vaccination
+                </a>
+                <a href="{{ url_for('growth_tracker') }}" class="nav-link-btn">
+                    <span>📈</span> Growth
+                </a>
+                <a href="{{ url_for('appointments') }}" class="nav-link-btn">
+                    <span>🩺</span> Appointments
+                </a>
+                <a href="{{ url_for('nutrition_guide') }}" class="nav-link-btn">
+                    <span>🥗</span> Nutrition
+                </a>
+                <a href="{{ url_for('symptoms_guide') }}" class="nav-link-btn active">
+                    <span>🩹</span> Symptoms
+                </a>
+            </div>
+
+            <div class="user-nav-actions">
+                {% if user %}
+                    <a href="{{ url_for('logout') }}" class="btn-logout">
+                        <span>🚪</span> Sign Out
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login_page') }}" class="btn-submit" style="width: auto; padding: 8px 18px; text-decoration: none; font-size: 13px;">
+                        <span>🔐</span> Sign In
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Hero Header -->
+        <div class="health-card-hero" style="margin-bottom: 26px;">
+            <div class="child-identity">
+                <div class="child-avatar-big" style="background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);">
+                    🩹
+                </div>
+                <div class="child-name-group">
+                    <h2>Symptom Triage &amp; Pediatric First Aid</h2>
+                    <p style="font-size: 13.5px; color: var(--text-muted); margin-top: 4px;">
+                        Quick reference guide for common childhood ailments, warning flags, and emergency first aid responses.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🚨 Emergency Red Flags Banner -->
+        <div class="emergency-red-flag">
+            <div class="emergency-icon">🚨</div>
+            <div class="emergency-text">
+                <h3>Immediate Pediatric Emergency Red Flags (Seek Urgent Hospital Care)</h3>
+                <p>
+                    If your child experiences any of the following symptoms, go immediately to the nearest Emergency Pediatric Hospital or dial 108:
+                </p>
+                <ul style="font-size: 13px; color: #7f1d1d; line-height: 1.6; margin-top: 8px; margin-left: 18px;">
+                    <li><strong>Infant Under 3 Months:</strong> Any rectal fever of 100.4°F (38°C) or higher.</li>
+                    <li><strong>Breathing Distress:</strong> Rapid breathing, chest ribs sinking in (retractions), wheezing, or blue tint around lips.</li>
+                    <li><strong>Severe Lethargy:</strong> Unusually floppy, unable to wake up, or not responding to voice/touch.</li>
+                    <li><strong>Dehydration:</strong> No wet diaper in 8+ hours, crying without tears, sunken soft spot (fontanelle).</li>
+                    <li><strong>Seizures or Stiff Neck:</strong> Accompanied by extreme light sensitivity or a dark purple rash that doesn't fade when pressed.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Common Childhood Illnesses Symptom Checker -->
+        <div class="section-header">
+            <h3><span>🩺</span> Common Pediatric Symptoms &amp; Home Care</h3>
+        </div>
+
+        <div class="symptoms-grid">
+            <!-- 1. Fever -->
+            <div class="symptom-card">
+                <div class="symptom-header">
+                    <div class="symptom-title">
+                        <span>🌡️</span> High Fever
+                    </div>
+                    <span class="triage-badge triage-moderate">Moderate Caution</span>
+                </div>
+                <div class="symptom-body">
+                    <p>Fever is the immune system's natural reaction against infections. Normal body temp is 98.6°F (37°C).</p>
+                    <div class="first-aid-box">
+                        <strong>Home Care:</strong> Keep the child hydrated with water, ORS, or milk. Dress in light cotton clothes. Use lukewarm sponge baths (never cold water/alcohol). Administer Paracetamol only as prescribed per child's weight.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Colic & Gas -->
+            <div class="symptom-card">
+                <div class="symptom-header">
+                    <div class="symptom-title">
+                        <span>💨</span> Infant Colic &amp; Gas
+                    </div>
+                    <span class="triage-badge triage-mild">Mild • Self-Limiting</span>
+                </div>
+                <div class="symptom-body">
+                    <p>Unexplained prolonged crying in healthy infants under 4 months, usually peaking in the evening.</p>
+                    <div class="first-aid-box">
+                        <strong>Relief Technique:</strong> Gently cycle baby's legs like a bicycle. Hold baby tummy-down along your forearm. Burp after every feed and ensure proper latch to avoid swallowing air.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Cough & Cold -->
+            <div class="symptom-card">
+                <div class="symptom-header">
+                    <div class="symptom-title">
+                        <span>🤧</span> Cold &amp; Congestion
+                    </div>
+                    <span class="triage-badge triage-mild">Mild • Viral</span>
+                </div>
+                <div class="symptom-body">
+                    <p>Runny or blocked nose, mild cough, sneezing. Usually caused by common seasonal viruses.</p>
+                    <div class="first-aid-box">
+                        <strong>Home Care:</strong> Use 1-2 drops of pediatric normal saline nasal drops before feedings and naps. Run a cool mist humidifier in the bedroom. Elevate mattress slightly.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Diarrhea & Vomiting -->
+            <div class="symptom-card">
+                <div class="symptom-header">
+                    <div class="symptom-title">
+                        <span>💧</span> Diarrhea &amp; Stomach Bug
+                    </div>
+                    <span class="triage-badge triage-urgent">Hydration Vital</span>
+                </div>
+                <div class="symptom-body">
+                    <p>Watery stools, nausea. The primary danger with pediatric diarrhea is rapid dehydration.</p>
+                    <div class="first-aid-box">
+                        <strong>ORS Protocol:</strong> Administer WHO-formula Oral Rehydration Salts (ORS) in small, frequent sips after every loose stool. Continue breast milk and avoid fruit juices or sugary drinks.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step-by-Step Pediatric First Aid Guides -->
+        <div class="section-header" style="margin-top: 10px;">
+            <h3><span>🚑</span> Step-by-Step Emergency First Aid</h3>
+        </div>
+
+        <!-- 1. Infant Choking (Under 1 Year) -->
+        <div class="first-aid-step-card">
+            <span class="step-pill-badge">Emergency Protocol</span>
+            <h4 style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 8px;">
+                👶 Infant Choking Relief (Under 1 Year)
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 12px; font-size: 13px; color: var(--text-dark);">
+                <div style="background: #ffffff; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                    <strong style="color: var(--primary);">Step 1: 5 Back Blows</strong>
+                    <p style="margin-top: 4px; color: var(--text-muted);">Lay infant facedown along your forearm, supporting jaw. Deliver 5 firm back blows between shoulder blades with heel of hand.</p>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                    <strong style="color: var(--primary);">Step 2: 5 Chest Thrusts</strong>
+                    <p style="margin-top: 4px; color: var(--text-muted);">Turn infant face up on your thigh. Place 2 fingers in center of breastbone and press down sharply 5 times.</p>
+                </div>
+                <div style="background: #ffffff; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                    <strong style="color: var(--primary);">Step 3: Repeat &amp; Call 108</strong>
+                    <p style="margin-top: 4px; color: var(--text-muted);">Repeat 5 blows / 5 thrusts until object dislodges or baby cries. Call emergency services immediately.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Minor Burns & Scalds -->
+        <div class="first-aid-step-card">
+            <span class="step-pill-badge" style="background: #059669;">Thermal First Aid</span>
+            <h4 style="font-size: 16px; font-weight: 800; color: var(--text-dark); margin-bottom: 8px;">
+                🔥 Minor Burns &amp; Scalds Treatment
+            </h4>
+            <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">
+                Immediately hold the burned area under <strong>cool, gentle running tap water for 15 to 20 minutes</strong>. 
+                Never apply ice, butter, oils, or toothpaste. Cover loosely with a clean, non-stick sterile gauze or plastic cling film and visit your doctor.
+            </p>
+        </div>
+
+    </div>
+
+</body>
+</html>

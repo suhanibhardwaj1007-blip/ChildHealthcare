@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaccination Tracker | LittleCare Child Healthcare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💉</text></svg>">
+    <style>
+        .page-shell {
+            width: 100%;
+            max-width: 1080px;
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(252, 231, 243, 0.9);
+            padding: 36px 40px;
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-shell">
+        
+        <!-- App Navigation Header -->
+        <div class="app-header-nav">
+            <a href="{{ url_for('dashboard') }}" class="brand-nav-logo">
+                <div class="brand-nav-icon">👶</div>
+                <div class="brand-nav-text">
+                    <h2>LittleCare</h2>
+                    <span>Pediatric Portal</span>
+                </div>
+            </a>
+
+            <div class="nav-links-bar">
+                <a href="{{ url_for('dashboard') }}" class="nav-link-btn">
+                    <span>🏠</span> Dashboard
+                </a>
+                <a href="{{ url_for('vaccination_tracker') }}" class="nav-link-btn active">
+                    <span>💉</span> Vaccination
+                </a>
+                <a href="{{ url_for('growth_tracker') }}" class="nav-link-btn">
+                    <span>📈</span> Growth
+                </a>
+                <a href="{{ url_for('appointments') }}" class="nav-link-btn">
+                    <span>🩺</span> Appointments
+                </a>
+                <a href="{{ url_for('nutrition_guide') }}" class="nav-link-btn">
+                    <span>🥗</span> Nutrition
+                </a>
+                <a href="{{ url_for('symptoms_guide') }}" class="nav-link-btn">
+                    <span>🩹</span> Symptoms
+                </a>
+            </div>
+
+            <div class="user-nav-actions">
+                <a href="{{ url_for('logout') }}" class="btn-logout">
+                    <span>🚪</span> Sign Out
+                </a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span class="alert-icon">
+                                {% if category == 'success' %}🎉
+                                {% elif category == 'error' %}⚠️
+                                {% elif category == 'warning' %}🔔
+                                {% else %}ℹ️{% endif %}
+                            </span>
+                            <span class="alert-text">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Child Switcher Selector Bar -->
+        <div class="child-selector-bar">
+            <div class="child-selector-label">
+                <span style="font-size: 20px;">👶</span>
+                <span>Select Child Profile:</span>
+            </div>
+            <div class="child-pills-list">
+                {% for c in children %}
+                    <a href="{{ url_for('vaccination_tracker', child_id=c.id) }}" 
+                       class="child-pill-item {% if c.id == selected_child.id %}active{% endif %}">
+                        <span>{% if c.gender == 'female' %}👧{% else %}👦{% endif %}</span>
+                        <span>{{ c.name }}</span>
+                    </a>
+                {% endfor %}
+                <a href="{{ url_for('add_child') }}" class="child-pill-item" style="border-style: dashed; color: var(--primary);">
+                    <span>➕</span> Add Child
+                </a>
+            </div>
+        </div>
+
+        <!-- Selected Child Banner -->
+        <div class="health-card-hero" style="margin-bottom: 24px;">
+            <div class="child-identity">
+                <div class="child-avatar-big {% if selected_child.gender == 'female' %}female{% endif %}">
+                    {% if selected_child.gender == 'female' %}👧{% else %}👦{% endif %}
+                </div>
+                <div class="child-name-group">
+                    <h2>{{ selected_child.name }}'s Immunization Schedule</h2>
+                    <div class="child-badges">
+                        <span class="badge-pill badge-age">🎂 {{ selected_child.display_age }}</span>
+                        <span class="badge-pill badge-gender">
+                            {% if selected_child.gender == 'female' %}👧 Female{% else %}👦 Male{% endif %}
+                        </span>
+                        <span class="badge-pill" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0;">
+                            📅 DOB: {{ selected_child.dob }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Stat Pills -->
+        <div class="stat-summary-strip">
+            <div class="stat-pill-box">
+                <div class="stat-pill-icon pink">💉</div>
+                <div class="stat-pill-text">
+                    <h5>Total Vaccines</h5>
+                    <div class="val">{{ summary.total }}</div>
+                </div>
+            </div>
+
+            <div class="stat-pill-box">
+                <div class="stat-pill-icon green">✅</div>
+                <div class="stat-pill-text">
+                    <h5>Administered</h5>
+                    <div class="val">{{ summary.completed }}</div>
+                </div>
+            </div>
+
+            <div class="stat-pill-box">
+                <div class="stat-pill-icon amber">⚠️</div>
+                <div class="stat-pill-text">
+                    <h5>Overdue Doses</h5>
+                    <div class="val">{{ summary.overdue }}</div>
+                </div>
+            </div>
+
+            <div class="stat-pill-box">
+                <div class="stat-pill-icon blue">⏳</div>
+                <div class="stat-pill-text">
+                    <h5>Upcoming Doses</h5>
+                    <div class="val">{{ summary.pending }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Immunization Progress Bar -->
+        <div class="progress-box">
+            <div class="progress-header">
+                <span>Overall Immunization Protection Level</span>
+                <span>{{ summary.progress_pct }}% Completed ({{ summary.completed }}/{{ summary.total }})</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" style="width: {{ summary.progress_pct }}%;"></div>
+            </div>
+        </div>
+
+        <!-- Vaccination Schedule Table -->
+        <div class="table-card">
+            <div class="table-header-title">
+                <h4>
+                    <span>📋</span>
+                    <span>National &amp; WHO Standard Immunization Timetable</span>
+                </h4>
+                <span style="font-size: 12.5px; color: var(--text-muted); font-weight: 600;">
+                    Click Action to Mark Given / Pending
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Age Milestone</th>
+                            <th>Vaccine &amp; Dose</th>
+                            <th>Prevents Disease</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Date Given</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in vaccines %}
+                            <tr>
+                                <td>
+                                    <strong style="color: var(--primary-dark);">{{ v.recommended_age_label }}</strong>
+                                </td>
+                                <td>
+                                    <strong>{{ v.vaccine_name }}</strong>
+                                    <div style="font-size: 11.5px; color: var(--text-muted);">{{ v.dose_number }}</div>
+                                </td>
+                                <td style="max-width: 200px;">
+                                    <span style="font-size: 12.5px; color: var(--text-dark);">{{ v.prevents_disease }}</span>
+                                </td>
+                                <td>
+                                    <span style="font-weight: 600;">{{ v.due_date }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge-status {{ v.status }}">
+                                        {% if v.status == 'completed' %}● Given{% elif v.status == 'overdue' %}● Overdue{% else %}● Due{% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span style="font-size: 12.5px; color: var(--text-muted);">
+                                        {{ v.administered_date if v.administered_date else '—' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('toggle_vaccination', vaccination_id=v.id) }}">
+                                        <input type="hidden" name="child_id" value="{{ selected_child.id }}">
+                                        {% if v.status == 'completed' %}
+                                            <button type="submit" class="btn-action-sm btn-toggle-undo" title="Click to mark pending">
+                                                <span>↺</span> Undo
+                                            </button>
+                                        {% else %}
+                                            <button type="submit" class="btn-action-sm btn-toggle-done" title="Click to mark administered">
+                                                <span>✓</span> Mark Given
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Medical Advisory Notice -->
+        <div style="background: #fdfafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; font-size: 13px; color: var(--text-muted); line-height: 1.5;">
+            <strong style="color: var(--text-dark);">💡 Pediatric Advisory:</strong>
+            Vaccine due dates are automatically computed according to standard pediatric guidelines from Indian Academy of Pediatrics (IAP) &amp; WHO. Please consult your certified pediatrician for minor schedule adjustments if your baby has a fever or mild illness.
+        </div>
+
+    </div>
+
+</body>
+</html>

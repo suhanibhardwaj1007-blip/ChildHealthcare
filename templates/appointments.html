@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Appointments | LittleCare Child Healthcare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩺</text></svg>">
+    <style>
+        .page-shell {
+            width: 100%;
+            max-width: 1080px;
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(252, 231, 243, 0.9);
+            padding: 36px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .booking-card {
+            background: #fdfafc;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 26px;
+            margin-bottom: 32px;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .appointment-item-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            transition: var(--transition);
+        }
+
+        .appointment-item-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px rgba(236, 72, 153, 0.08);
+        }
+
+        .app-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-date-box {
+            background: var(--primary-light);
+            border: 1px solid #fbcfe8;
+            border-radius: 14px;
+            padding: 10px 14px;
+            text-align: center;
+            min-width: 90px;
+        }
+
+        .app-date-box .day {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary-dark);
+        }
+
+        .app-date-box .slot {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-shell">
+        
+        <!-- App Navigation Header -->
+        <div class="app-header-nav">
+            <a href="{{ url_for('dashboard') }}" class="brand-nav-logo">
+                <div class="brand-nav-icon">👶</div>
+                <div class="brand-nav-text">
+                    <h2>LittleCare</h2>
+                    <span>Pediatric Portal</span>
+                </div>
+            </a>
+
+            <div class="nav-links-bar">
+                <a href="{{ url_for('dashboard') }}" class="nav-link-btn">
+                    <span>🏠</span> Dashboard
+                </a>
+                <a href="{{ url_for('vaccination_tracker') }}" class="nav-link-btn">
+                    <span>💉</span> Vaccination
+                </a>
+                <a href="{{ url_for('growth_tracker') }}" class="nav-link-btn">
+                    <span>📈</span> Growth
+                </a>
+                <a href="{{ url_for('appointments') }}" class="nav-link-btn active">
+                    <span>🩺</span> Appointments
+                </a>
+                <a href="{{ url_for('nutrition_guide') }}" class="nav-link-btn">
+                    <span>🥗</span> Nutrition
+                </a>
+                <a href="{{ url_for('symptoms_guide') }}" class="nav-link-btn">
+                    <span>🩹</span> Symptoms
+                </a>
+            </div>
+
+            <div class="user-nav-actions">
+                <a href="{{ url_for('logout') }}" class="btn-logout">
+                    <span>🚪</span> Sign Out
+                </a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span class="alert-icon">
+                                {% if category == 'success' %}🎉
+                                {% elif category == 'error' %}⚠️
+                                {% elif category == 'warning' %}🔔
+                                {% else %}ℹ️{% endif %}
+                            </span>
+                            <span class="alert-text">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Top Header & Verified Doctors Directory -->
+        <div class="section-header" style="margin-bottom: 20px;">
+            <h3>
+                <span>👨‍⚕️</span> Verified Pediatric Specialists ({{ doctors|length }})
+            </h3>
+            <span style="font-size: 13px; color: var(--text-muted);">
+                Consult leading pediatricians &amp; child health specialists
+            </span>
+        </div>
+
+        <!-- Doctor Cards Grid -->
+        <div class="doctors-grid">
+            {% for doc in doctors %}
+                <div class="doctor-card">
+                    <div>
+                        <div class="doctor-header">
+                            <div class="doctor-avatar-circle">
+                                {{ doc.avatar }}
+                            </div>
+                            <div class="doctor-title-info">
+                                <h4>{{ doc.name }}</h4>
+                                <div class="doctor-specialty">{{ doc.specialization }}</div>
+                                <div class="doctor-qual">{{ doc.qualification }}</div>
+                            </div>
+                        </div>
+
+                        <div class="doctor-details-list">
+                            <div class="doc-info-item">
+                                <span class="doc-info-label">🏥 Hospital:</span>
+                                <span class="doc-info-val">{{ doc.hospital }}</span>
+                            </div>
+                            <div class="doc-info-item">
+                                <span class="doc-info-label">⭐ Rating &amp; Exp:</span>
+                                <span class="doc-info-val">{{ doc.rating }} ★ ({{ doc.experience_years }} yrs exp)</span>
+                            </div>
+                            <div class="doc-info-item">
+                                <span class="doc-info-label">🕒 Available:</span>
+                                <span class="doc-info-val">{{ doc.available_days }} ({{ doc.available_time }})</span>
+                            </div>
+                            <div class="doc-info-item">
+                                <span class="doc-info-label">💰 Fee:</span>
+                                <span class="doc-info-val" style="color: #059669;">₹{{ doc.consultation_fee }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="#book-form-section" 
+                       onclick="document.getElementById('doctor_select').value = '{{ doc.id }}';" 
+                       class="btn-view-healthcard">
+                        <span>Book with {{ doc.name.split(' ')[1] if ' ' in doc.name else doc.name }}</span>
+                        <span>➔</span>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Book Appointment Form Section -->
+        <div class="booking-card" id="book-form-section">
+            <h3 style="font-size: 18px; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                <span>📅</span> Book a Pediatric Consultation
+            </h3>
+            <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 20px;">
+                Select your child, choose a specialist, and book an instant clinic or video slot.
+            </p>
+
+            {% if children %}
+                <form method="POST" action="{{ url_for('book_appointment') }}">
+                    <div class="form-grid-2">
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label class="input-label">Select Child *</label>
+                            <select name="child_id" class="form-control" style="padding-left: 14px;" required>
+                                {% for c in children %}
+                                    <option value="{{ c.id }}">{{ c.name }} ({{ c.dob }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label class="input-label">Select Pediatric Specialist *</label>
+                            <select name="doctor_id" id="doctor_select" class="form-control" style="padding-left: 14px;" required>
+                                {% for doc in doctors %}
+                                    <option value="{{ doc.id }}">{{ doc.name }} - {{ doc.specialization }} (₹{{ doc.consultation_fee }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label class="input-label">Preferred Date *</label>
+                            <input type="date" name="appointment_date" class="form-control" style="padding-left: 14px;" min="{{ today_date }}" value="{{ today_date }}" required>
+                        </div>
+
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label class="input-label">Preferred Time Slot *</label>
+                            <select name="time_slot" class="form-control" style="padding-left: 14px;" required>
+                                <option value="10:00 AM - 10:30 AM">10:00 AM - 10:30 AM (Morning)</option>
+                                <option value="11:30 AM - 12:00 PM">11:30 AM - 12:00 PM (Morning)</option>
+                                <option value="02:00 PM - 02:30 PM">02:00 PM - 02:30 PM (Afternoon)</option>
+                                <option value="03:30 PM - 04:00 PM">03:30 PM - 04:00 PM (Afternoon)</option>
+                                <option value="05:00 PM - 05:30 PM">05:00 PM - 05:30 PM (Evening)</option>
+                                <option value="06:30 PM - 07:00 PM">06:30 PM - 07:00 PM (Evening)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 16px;">
+                        <label class="input-label">Reason for Visit / Child's Symptoms *</label>
+                        <input type="text" name="reason_symptoms" class="form-control" style="padding-left: 14px;" placeholder="e.g. Mild fever for 2 days, vaccination checkup, cough and runny nose" required>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label class="input-label">Additional Medical Notes / Queries (Optional)</label>
+                        <input type="text" name="notes" class="form-control" style="padding-left: 14px;" placeholder="e.g. Any known allergies or past medications given">
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn-submit" style="width: auto; padding: 12px 28px;">
+                            <span>🩺</span> Confirm &amp; Schedule Appointment
+                        </button>
+                    </div>
+                </form>
+            {% else %}
+                <div style="background: #fff5f8; border: 1.5px dashed #f472b6; border-radius: var(--radius-md); padding: 24px; text-align: center;">
+                    <p style="font-weight: 700; color: var(--text-dark); margin-bottom: 8px;">No registered child profile found.</p>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Please register a child profile before booking a doctor consultation.</p>
+                    <a href="{{ url_for('add_child') }}" class="btn-submit" style="display: inline-flex; width: auto; padding: 10px 22px; text-decoration: none;">
+                        <span>➕</span> Add Child Profile
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- My Booked Appointments Section -->
+        <div class="section-header">
+            <h3>
+                <span>📋</span> My Scheduled Appointments ({{ appointments|length }})
+            </h3>
+        </div>
+
+        {% if appointments %}
+            <div>
+                {% for a in appointments %}
+                    <div class="appointment-item-card">
+                        <div class="app-left">
+                            <div class="app-date-box">
+                                <div class="day">{{ a.appointment_date[8:10] ~ ' ' ~ a.appointment_date[5:7] }}</div>
+                                <div class="slot">{{ a.time_slot.split(' - ')[0] if ' - ' in a.time_slot else a.time_slot }}</div>
+                            </div>
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <h4 style="font-size: 16px; font-weight: 800; color: var(--text-dark);">
+                                        {{ a.doctor_name }}
+                                    </h4>
+                                    <span class="badge-status {{ a.status }}">
+                                        ● {{ a.status }}
+                                    </span>
+                                </div>
+                                <p style="font-size: 13px; color: var(--primary-dark); font-weight: 600; margin-top: 2px;">
+                                    Patient: 👶 {{ a.child_name }} | {{ a.doctor_specialization }}
+                                </p>
+                                <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px;">
+                                    Reason: {{ a.reason_symptoms }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div>
+                            {% if a.status == 'confirmed' %}
+                                <form method="POST" action="{{ url_for('cancel_appointment', appointment_id=a.id) }}" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                                    <button type="submit" class="btn-action-sm btn-toggle-undo" style="padding: 8px 16px;">
+                                        <span>✕</span> Cancel Slot
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">
+                                    Cancelled
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 32px; text-align: center; color: var(--text-muted);">
+                <span style="font-size: 32px; display: block; margin-bottom: 8px;">🩺</span>
+                <p style="font-weight: 600;">No appointments booked yet.</p>
+                <p style="font-size: 12.5px;">Schedule your child's first routine checkup using the directory and form above.</p>
+            </div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

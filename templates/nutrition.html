@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutrition &amp; Meal Guides | LittleCare Child Healthcare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥗</text></svg>">
+    <style>
+        .page-shell {
+            width: 100%;
+            max-width: 1080px;
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(252, 231, 243, 0.9);
+            padding: 36px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nutrient-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .nutrient-card {
+            background: #fdfafc;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            transition: var(--transition);
+        }
+
+        .nutrient-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .safety-box {
+            background: #fff1f2;
+            border: 1.5px solid #fecdd3;
+            border-radius: var(--radius-md);
+            padding: 22px;
+            margin-bottom: 28px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-shell">
+        
+        <!-- App Navigation Header -->
+        <div class="app-header-nav">
+            <a href="{{ url_for('dashboard') }}" class="brand-nav-logo">
+                <div class="brand-nav-icon">👶</div>
+                <div class="brand-nav-text">
+                    <h2>LittleCare</h2>
+                    <span>Pediatric Portal</span>
+                </div>
+            </a>
+
+            <div class="nav-links-bar">
+                <a href="{{ url_for('dashboard') }}" class="nav-link-btn">
+                    <span>🏠</span> Dashboard
+                </a>
+                <a href="{{ url_for('vaccination_tracker') }}" class="nav-link-btn">
+                    <span>💉</span> Vaccination
+                </a>
+                <a href="{{ url_for('growth_tracker') }}" class="nav-link-btn">
+                    <span>📈</span> Growth
+                </a>
+                <a href="{{ url_for('appointments') }}" class="nav-link-btn">
+                    <span>🩺</span> Appointments
+                </a>
+                <a href="{{ url_for('nutrition_guide') }}" class="nav-link-btn active">
+                    <span>🥗</span> Nutrition
+                </a>
+                <a href="{{ url_for('symptoms_guide') }}" class="nav-link-btn">
+                    <span>🩹</span> Symptoms
+                </a>
+            </div>
+
+            <div class="user-nav-actions">
+                {% if user %}
+                    <a href="{{ url_for('logout') }}" class="btn-logout">
+                        <span>🚪</span> Sign Out
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login_page') }}" class="btn-submit" style="width: auto; padding: 8px 18px; text-decoration: none; font-size: 13px;">
+                        <span>🔐</span> Sign In
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Hero Header -->
+        <div class="health-card-hero" style="margin-bottom: 26px;">
+            <div class="child-identity">
+                <div class="child-avatar-big" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    🥗
+                </div>
+                <div class="child-name-group">
+                    <h2>Pediatric Nutrition &amp; Feeding Guides</h2>
+                    <p style="font-size: 13.5px; color: var(--text-muted); margin-top: 4px;">
+                        Evidence-based nutrition milestones, age-wise dietary stages, and pediatrician-tested wholesome recipes.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ⚠️ Critical Safety Alert -->
+        <div class="safety-box">
+            <h4 style="font-size: 15px; font-weight: 800; color: #9f1239; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                <span>⚠️</span> Critical Infant Feeding Safety Rules
+            </h4>
+            <ul style="font-size: 13px; color: #881337; line-height: 1.6; margin-left: 20px;">
+                <li><strong>No Honey Before 1 Year:</strong> Risk of infant botulism from bacterial spores.</li>
+                <li><strong>No Added Salt or Sugar Before 12 Months:</strong> Protects delicate infant kidneys and prevents early sugar dependence.</li>
+                <li><strong>Choking Hazard Prevention:</strong> Never give whole grapes, uncut cherry tomatoes, hard raw carrots, or whole nuts to toddlers. Always quarter round foods lengthwise.</li>
+                <li><strong>The 3-Day Rule:</strong> When introducing high-allergy foods (eggs, peanut butter, dairy, wheat), introduce one item at a time over 3 days to watch for reactions.</li>
+            </ul>
+        </div>
+
+        <!-- Stage-by-Stage Feeding Stages -->
+        <div class="section-header">
+            <h3><span>🍼</span> Age-Wise Feeding Stages</h3>
+        </div>
+
+        <!-- Stage 1: 0 - 6 Months -->
+        <div class="nutrition-stage-card">
+            <div class="nutrition-stage-header">
+                <h4 style="font-size: 17px; font-weight: 800; color: var(--text-dark);">
+                    1. Exclusive Liquid Diet (0 – 6 Months)
+                </h4>
+                <span class="stage-badge">Birth to 6 Months</span>
+            </div>
+            <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">
+                Breast milk or iron-fortified infant formula provides 100% of all required calories, hydration, and antibodies. No additional water, teas, or cow milk needed.
+            </p>
+            <div style="background: #fdfafc; border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; color: var(--text-dark);">
+                <strong>Feeding Schedule:</strong> Every 2 to 3 hours on demand (approx. 8 to 12 feedings per 24 hours). Vitamin D3 drops (400 IU/day) are recommended for breastfed infants.
+            </div>
+        </div>
+
+        <!-- Stage 2: 6 - 8 Months -->
+        <div class="nutrition-stage-card">
+            <div class="nutrition-stage-header">
+                <h4 style="font-size: 17px; font-weight: 800; color: var(--text-dark);">
+                    2. Starting Solids &amp; Smooth Purees (6 – 8 Months)
+                </h4>
+                <span class="stage-badge">6 to 8 Months</span>
+            </div>
+            <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">
+                Signs of readiness include sitting with minimal support, good head control, and showing keen interest in adult food. Start with single-ingredient, smooth, iron-rich textures.
+            </p>
+            <div style="background: #fdfafc; border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; color: var(--text-dark);">
+                <strong>Ideal Starter Foods:</strong> Steamed apple/pear puree, mashed sweet potato, pureed avocado, iron-fortified single-grain ragi or rice porridge, and well-cooked moong dal soup.
+            </div>
+        </div>
+
+        <!-- Stage 3: 8 - 12 Months -->
+        <div class="nutrition-stage-card">
+            <div class="nutrition-stage-header">
+                <h4 style="font-size: 17px; font-weight: 800; color: var(--text-dark);">
+                    3. Mashed Textures &amp; Finger Foods (8 – 12 Months)
+                </h4>
+                <span class="stage-badge">8 to 12 Months</span>
+            </div>
+            <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">
+                Encourage self-feeding with soft, graspable finger foods to develop fine motor pincer grasp and oral chew-swallow coordination.
+            </p>
+            <div style="background: #fdfafc; border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; color: var(--text-dark);">
+                <strong>Ideal Finger Foods:</strong> Soft steamed carrot sticks, banana coins, soft boiled egg pieces, small soft paneer/tofu cubes, and thicker vegetable khichdi.
+            </div>
+        </div>
+
+        <!-- Stage 4: 1 - 3 Years -->
+        <div class="nutrition-stage-card">
+            <div class="nutrition-stage-header">
+                <h4 style="font-size: 17px; font-weight: 800; color: var(--text-dark);">
+                    4. Toddler Balanced Family Meals (1 – 3 Years)
+                </h4>
+                <span class="stage-badge">1 to 3 Years</span>
+            </div>
+            <p style="font-size: 13.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">
+                Toddlers can now eat modified family meals with all food groups represented: complex carbohydrates, lean protein, healthy fats, and vibrant fruits/vegetables.
+            </p>
+            <div style="background: #fdfafc; border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; color: var(--text-dark);">
+                <strong>Meal Structure:</strong> 3 balanced meals + 2 nutritious snack breaks daily. Offer whole pasteurized cow's milk (max 400-500 ml/day so it doesn't displace solid food intake).
+            </div>
+        </div>
+
+        <!-- Essential Nutrients Breakdown -->
+        <div class="section-header" style="margin-top: 28px;">
+            <h3><span>🧬</span> Essential Pediatric Nutrients</h3>
+        </div>
+
+        <div class="nutrient-grid">
+            <div class="nutrient-card">
+                <div style="font-size: 24px; margin-bottom: 6px;">🥩</div>
+                <h4 style="font-size: 14.5px; font-weight: 800; color: var(--text-dark);">Iron</h4>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Brain development &amp; preventing anemia.</p>
+                <div style="font-size: 11.5px; color: var(--primary-dark); font-weight: 700; margin-top: 6px;">Sources: Ragi, lentils, spinach, egg yolk.</div>
+            </div>
+
+            <div class="nutrient-card">
+                <div style="font-size: 24px; margin-bottom: 6px;">🥛</div>
+                <h4 style="font-size: 14.5px; font-weight: 800; color: var(--text-dark);">Calcium &amp; Vitamin D</h4>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Strong bones and healthy teeth formation.</p>
+                <div style="font-size: 11.5px; color: var(--primary-dark); font-weight: 700; margin-top: 6px;">Sources: Milk, curd, paneer, sunlight.</div>
+            </div>
+
+            <div class="nutrient-card">
+                <div style="font-size: 24px; margin-bottom: 6px;">🐟</div>
+                <h4 style="font-size: 14.5px; font-weight: 800; color: var(--text-dark);">Omega-3 (DHA)</h4>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Optic nerve &amp; cognitive visual acuity.</p>
+                <div style="font-size: 11.5px; color: var(--primary-dark); font-weight: 700; margin-top: 6px;">Sources: Walnuts (powdered), chia, flaxseeds.</div>
+            </div>
+
+            <div class="nutrient-card">
+                <div style="font-size: 24px; margin-bottom: 6px;">🥕</div>
+                <h4 style="font-size: 14.5px; font-weight: 800; color: var(--text-dark);">Vitamin A &amp; Zinc</h4>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Immune resilience &amp; cellular growth.</p>
+                <div style="font-size: 11.5px; color: var(--primary-dark); font-weight: 700; margin-top: 6px;">Sources: Carrots, pumpkin, sweet potato.</div>
+            </div>
+        </div>
+
+        <!-- Wholesome Pediatric Recipes -->
+        <div class="section-header">
+            <h3><span>🥣</span> Wholesome Pediatric Recipes</h3>
+        </div>
+
+        <div class="recipe-cards-grid">
+            <div class="recipe-card">
+                <div>
+                    <h4><span>🍎</span> Apple &amp; Oats Porridge</h4>
+                    <span class="recipe-tag">6+ Months • Iron Rich</span>
+                    <div class="recipe-ingredients">
+                        <strong>Ingredients:</strong> Rolled oats (2 tbsp), 1/2 sweet red apple (peeled &amp; grated), 1 cup water/breastmilk, pinch of cinnamon powder.
+                    </div>
+                    <p style="font-size: 12.5px; color: var(--text-dark); line-height: 1.45;">
+                        Cook oats in water until soft. Add grated apple and simmer for 3 minutes until smooth and sweet. Stir in cinnamon.
+                    </p>
+                </div>
+            </div>
+
+            <div class="recipe-card">
+                <div>
+                    <h4><span>🍲</span> Moong Dal &amp; Spinach Khichdi</h4>
+                    <span class="recipe-tag">8+ Months • High Protein</span>
+                    <div class="recipe-ingredients">
+                        <strong>Ingredients:</strong> Yellow moong dal (1 tbsp), rice (1 tbsp), chopped spinach (1 tbsp), pinch turmeric &amp; cumin, 1/2 tsp pure ghee.
+                    </div>
+                    <p style="font-size: 12.5px; color: var(--text-dark); line-height: 1.45;">
+                        Pressure cook dal, rice, and spinach with water and turmeric for 4 whistles. Mash well with ghee for a warm, easily digestible comfort meal.
+                    </p>
+                </div>
+            </div>
+
+            <div class="recipe-card">
+                <div>
+                    <h4><span>🥑</span> Creamy Avocado Banana Puree</h4>
+                    <span class="recipe-tag">6+ Months • Healthy Fats</span>
+                    <div class="recipe-ingredients">
+                        <strong>Ingredients:</strong> 1/2 ripe avocado, 1/2 ripe banana, 1 tsp breastmilk/formula (optional).
+                    </div>
+                    <p style="font-size: 12.5px; color: var(--text-dark); line-height: 1.45;">
+                        Scoop out fresh ripe avocado and fork-mash with sweet ripe banana until velvety smooth. Rich in natural brain-boosting oleic fats.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

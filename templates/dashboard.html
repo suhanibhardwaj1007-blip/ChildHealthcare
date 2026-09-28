@@ -370,27 +370,59 @@
 
     <div class="dashboard-container">
         
-        <!-- Header -->
-        <div class="dashboard-header">
+        <!-- App Navigation Header -->
+        <div class="app-header-nav">
+            <a href="{{ url_for('dashboard') }}" class="brand-nav-logo">
+                <div class="brand-nav-icon">👶</div>
+                <div class="brand-nav-text">
+                    <h2>LittleCare</h2>
+                    <span>Pediatric Portal</span>
+                </div>
+            </a>
+
+            <div class="nav-links-bar">
+                <a href="{{ url_for('dashboard') }}" class="nav-link-btn active">
+                    <span>🏠</span> Dashboard
+                </a>
+                <a href="{{ url_for('vaccination_tracker') }}" class="nav-link-btn">
+                    <span>💉</span> Vaccination
+                </a>
+                <a href="{{ url_for('growth_tracker') }}" class="nav-link-btn">
+                    <span>📈</span> Growth
+                </a>
+                <a href="{{ url_for('appointments') }}" class="nav-link-btn">
+                    <span>🩺</span> Appointments
+                </a>
+                <a href="{{ url_for('nutrition_guide') }}" class="nav-link-btn">
+                    <span>🥗</span> Nutrition
+                </a>
+                <a href="{{ url_for('symptoms_guide') }}" class="nav-link-btn">
+                    <span>🩹</span> Symptoms
+                </a>
+            </div>
+
+            <div class="user-nav-actions">
+                <a href="{{ url_for('add_child') }}" class="btn-add-child-header" style="padding: 8px 14px; font-size: 13px;">
+                    <span>➕</span> Add Child
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn-logout" style="padding: 8px 14px; font-size: 13px;">
+                    <span>🚪</span> Sign Out
+                </a>
+            </div>
+        </div>
+
+        <!-- User Welcome Banner -->
+        <div class="dashboard-header" style="border-bottom: none; margin-bottom: 20px; padding-bottom: 0;">
             <div class="user-welcome">
                 <div class="avatar-circle">
                     {{ user.full_name[0] if user.full_name else '👶' }}
                 </div>
                 <div class="user-info">
-                    <h2>Welcome, {{ user.full_name }}! 👋</h2>
+                    <h2>Welcome back, {{ user.full_name }}! 👋</h2>
                     <span class="role-badge">
                         {% if user.role == 'doctor' %}👨‍⚕️ Pediatric Specialist (Doctor){% else %}👨‍👩‍👧 Parent / Guardian{% endif %}
                     </span>
                 </div>
-            </div>
-
-            <div class="header-btn-group">
-                <a href="{{ url_for('add_child') }}" class="btn-add-child-header">
-                    <span>➕</span> Add Child Profile
-                </a>
-                <a href="{{ url_for('logout') }}" class="btn-logout">
-                    <span>🚪</span> Sign Out
-                </a>
             </div>
         </div>
 
@@ -447,10 +479,22 @@
                                     <span class="tag-pill" style="background: #fff1f2; color: #be123c; border: 1px solid #fecdd3;">⚠️ Allergy Alert</span>
                                 {% endif %}
                             </div>
+
+                            {% if child.vac_summary %}
+                                <div style="margin-bottom: 14px;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">
+                                        <span>Vaccine Protection</span>
+                                        <span style="color: var(--primary);">{{ child.vac_summary.progress_pct }}%</span>
+                                    </div>
+                                    <div class="progress-track" style="height: 6px;">
+                                        <div class="progress-fill" style="width: {{ child.vac_summary.progress_pct }}%;"></div>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
 
                         <a href="{{ url_for('child_detail', child_id=child.id) }}" class="btn-view-healthcard">
-                            <span>View Health Card</span>
+                            <span>View Health Card &amp; Schedule</span>
                             <span>➔</span>
                         </a>
                     </div>
@@ -475,29 +519,40 @@
         </div>
 
         <div class="grid-cards">
-            <div class="dash-card">
+            <a href="{{ url_for('vaccination_tracker') }}" class="dash-card" style="text-decoration: none; color: inherit;">
                 <div class="dash-card-icon">💉</div>
                 <h4>Smart Vaccination Tracker</h4>
                 <p>Track age-wise vaccine milestones, completed doses, and upcoming schedules.</p>
-            </div>
+                <span style="font-size: 12px; font-weight: 700; color: var(--primary); margin-top: auto;">Open Tracker ➔</span>
+            </a>
 
-            <div class="dash-card">
+            <a href="{{ url_for('growth_tracker') }}" class="dash-card" style="text-decoration: none; color: inherit;">
                 <div class="dash-card-icon">📈</div>
                 <h4>Growth &amp; Milestones</h4>
                 <p>Log height, weight, and head circumference against WHO pediatric percentiles.</p>
-            </div>
+                <span style="font-size: 12px; font-weight: 700; color: var(--primary); margin-top: auto;">Monitor Growth ➔</span>
+            </a>
 
-            <div class="dash-card">
+            <a href="{{ url_for('appointments') }}" class="dash-card" style="text-decoration: none; color: inherit;">
                 <div class="dash-card-icon">🩺</div>
                 <h4>Doctor Appointments</h4>
-                <p>Schedule consultations with pediatricians and view booked appointments.</p>
-            </div>
+                <p>Schedule consultations with verified pediatric specialists and manage clinic visits.</p>
+                <span style="font-size: 12px; font-weight: 700; color: var(--primary); margin-top: auto;">Book Consult ➔</span>
+            </a>
 
-            <div class="dash-card">
+            <a href="{{ url_for('nutrition_guide') }}" class="dash-card" style="text-decoration: none; color: inherit;">
                 <div class="dash-card-icon">🥗</div>
                 <h4>Nutrition &amp; Meal Plans</h4>
-                <p>Age-tailored infant nutrition guides and wholesome recipe ideas.</p>
-            </div>
+                <p>Age-tailored infant nutrition guides, allergen rules, and wholesome recipes.</p>
+                <span style="font-size: 12px; font-weight: 700; color: var(--primary); margin-top: auto;">Explore Diet ➔</span>
+            </a>
+
+            <a href="{{ url_for('symptoms_guide') }}" class="dash-card" style="text-decoration: none; color: inherit;">
+                <div class="dash-card-icon">🩹</div>
+                <h4>Symptom Checker &amp; First Aid</h4>
+                <p>Triage guidance for common ailments, red flag warnings, and emergency aid steps.</p>
+                <span style="font-size: 12px; font-weight: 700; color: var(--primary); margin-top: auto;">View First Aid ➔</span>
+            </a>
         </div>
 
         <!-- 3. USER PROFILE INFORMATION CARD -->

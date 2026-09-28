@@ -461,23 +461,26 @@
         <div class="modules-launchpad">
             <h3>🚀 Health Modules for {{ child.name }}</h3>
             <div class="launch-grid">
-                <div class="launch-card">
+                <a href="{{ url_for('vaccination_tracker', child_id=child.id) }}" class="launch-card">
                     <div class="launch-icon">💉</div>
                     <h4>Smart Vaccination Tracker</h4>
                     <p>Age-wise automated vaccine schedule from birth to 12+ years based on date of birth.</p>
-                </div>
+                    <span style="font-size: 12px; font-weight: 700; color: var(--primary); margin-top: auto;">Open Schedule ➔</span>
+                </a>
 
-                <div class="launch-card">
+                <a href="{{ url_for('growth_tracker', child_id=child.id) }}" class="launch-card">
                     <div class="launch-icon">📈</div>
                     <h4>Growth &amp; BMI Monitor</h4>
                     <p>Log periodic height and weight against WHO pediatric growth standard curves.</p>
-                </div>
+                    <span style="font-size: 12px; font-weight: 700; color: var(--primary); margin-top: auto;">Track Growth ➔</span>
+                </a>
 
-                <div class="launch-card">
+                <a href="{{ url_for('appointments', child_id=child.id) }}" class="launch-card">
                     <div class="launch-icon">🩺</div>
                     <h4>Doctor Appointments</h4>
                     <p>Schedule specialist pediatric consultations and maintain clinical records.</p>
-                </div>
+                    <span style="font-size: 12px; font-weight: 700; color: var(--primary); margin-top: auto;">Book Visit ➔</span>
+                </a>
             </div>
         </div>
 

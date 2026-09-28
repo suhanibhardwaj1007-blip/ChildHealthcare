@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Growth &amp; Milestones | LittleCare Child Healthcare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
+    <style>
+        .page-shell {
+            width: 100%;
+            max-width: 1080px;
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(252, 231, 243, 0.9);
+            padding: 36px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .growth-form-card {
+            background: #fdfafc;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            margin-bottom: 28px;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-shell">
+        
+        <!-- App Navigation Header -->
+        <div class="app-header-nav">
+            <a href="{{ url_for('dashboard') }}" class="brand-nav-logo">
+                <div class="brand-nav-icon">👶</div>
+                <div class="brand-nav-text">
+                    <h2>LittleCare</h2>
+                    <span>Pediatric Portal</span>
+                </div>
+            </a>
+
+            <div class="nav-links-bar">
+                <a href="{{ url_for('dashboard') }}" class="nav-link-btn">
+                    <span>🏠</span> Dashboard
+                </a>
+                <a href="{{ url_for('vaccination_tracker') }}" class="nav-link-btn">
+                    <span>💉</span> Vaccination
+                </a>
+                <a href="{{ url_for('growth_tracker') }}" class="nav-link-btn active">
+                    <span>📈</span> Growth
+                </a>
+                <a href="{{ url_for('appointments') }}" class="nav-link-btn">
+                    <span>🩺</span> Appointments
+                </a>
+                <a href="{{ url_for('nutrition_guide') }}" class="nav-link-btn">
+                    <span>🥗</span> Nutrition
+                </a>
+                <a href="{{ url_for('symptoms_guide') }}" class="nav-link-btn">
+                    <span>🩹</span> Symptoms
+                </a>
+            </div>
+
+            <div class="user-nav-actions">
+                <a href="{{ url_for('logout') }}" class="btn-logout">
+                    <span>🚪</span> Sign Out
+                </a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span class="alert-icon">
+                                {% if category == 'success' %}🎉
+                                {% elif category == 'error' %}⚠️
+                                {% elif category == 'warning' %}🔔
+                                {% else %}ℹ️{% endif %}
+                            </span>
+                            <span class="alert-text">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Child Selector Bar -->
+        <div class="child-selector-bar">
+            <div class="child-selector-label">
+                <span style="font-size: 20px;">👶</span>
+                <span>Select Child Profile:</span>
+            </div>
+            <div class="child-pills-list">
+                {% for c in children %}
+                    <a href="{{ url_for('growth_tracker', child_id=c.id) }}" 
+                       class="child-pill-item {% if c.id == selected_child.id %}active{% endif %}">
+                        <span>{% if c.gender == 'female' %}👧{% else %}👦{% endif %}</span>
+                        <span>{{ c.name }}</span>
+                    </a>
+                {% endfor %}
+                <a href="{{ url_for('add_child') }}" class="child-pill-item" style="border-style: dashed; color: var(--primary);">
+                    <span>➕</span> Add Child
+                </a>
+            </div>
+        </div>
+
+        <!-- Current Child Header Card -->
+        <div class="health-card-hero" style="margin-bottom: 24px;">
+            <div class="child-identity">
+                <div class="child-avatar-big {% if selected_child.gender == 'female' %}female{% endif %}">
+                    {% if selected_child.gender == 'female' %}👧{% else %}👦{% endif %}
+                </div>
+                <div class="child-name-group">
+                    <h2>{{ selected_child.name }}'s Growth Monitor</h2>
+                    <div class="child-badges">
+                        <span class="badge-pill badge-age">🎂 {{ selected_child.display_age }} ({{ current_age_months }} months)</span>
+                        <span class="badge-pill badge-gender">
+                            {% if selected_child.gender == 'female' %}👧 Female{% else %}👦 Male{% endif %}
+                        </span>
+                        {% if latest and latest.growth_status %}
+                            <span class="badge-pill" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0;">
+                                📊 WHO Status: {{ latest.growth_status }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Latest Stats Cards Strip -->
+        <div class="stats-grid-3" style="margin-bottom: 24px;">
+            <div class="stat-card">
+                <div class="stat-icon">⚖️</div>
+                <div class="stat-content">
+                    <h4>Current Weight</h4>
+                    <div class="stat-value">
+                        {% if latest %}
+                            {{ latest.weight_kg }} kg
+                        {% elif selected_child.birth_weight_kg %}
+                            {{ selected_child.birth_weight_kg }} kg (Birth)
+                        {% else %}
+                            Not recorded
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📏</div>
+                <div class="stat-content">
+                    <h4>Current Height / Length</h4>
+                    <div class="stat-value">
+                        {% if latest %}
+                            {{ latest.height_cm }} cm
+                        {% elif selected_child.birth_height_cm %}
+                            {{ selected_child.birth_height_cm }} cm (Birth)
+                        {% else %}
+                            Not recorded
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🧬</div>
+                <div class="stat-content">
+                    <h4>Pediatric BMI Index</h4>
+                    <div class="stat-value">
+                        {% if latest and latest.bmi %}
+                            {{ latest.bmi }} kg/m²
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log New Growth Record Form -->
+        <div class="growth-form-card">
+            <h3 style="font-size: 17px; font-weight: 800; color: var(--text-dark); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                <span>➕</span> Log New Growth Measurement
+            </h3>
+            
+            <form method="POST" action="{{ url_for('add_growth_record') }}">
+                <input type="hidden" name="child_id" value="{{ selected_child.id }}">
+                
+                <div class="form-grid-3">
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label class="input-label">Measurement Date *</label>
+                        <input type="date" name="record_date" class="form-control" style="padding-left: 14px;" value="{{ today_date }}" max="{{ today_date }}" required>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label class="input-label">Weight (kg) *</label>
+                        <input type="number" step="0.05" name="weight_kg" class="form-control" style="padding-left: 14px;" placeholder="e.g. 8.4" required>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label class="input-label">Height / Length (cm) *</label>
+                        <input type="number" step="0.1" name="height_cm" class="form-control" style="padding-left: 14px;" placeholder="e.g. 72.5" required>
+                    </div>
+                </div>
+
+                <div class="form-grid-3">
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label class="input-label">Head Circumference (cm, optional)</label>
+                        <input type="number" step="0.1" name="head_circumference_cm" class="form-control" style="padding-left: 14px;" placeholder="e.g. 44.0">
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 0; grid-column: span 2;">
+                        <label class="input-label">Pediatric Notes / Observations</label>
+                        <input type="text" name="notes" class="form-control" style="padding-left: 14px;" placeholder="e.g. Routine 6-month checkup with pediatrician">
+                    </div>
+                </div>
+
+                <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+                    <button type="submit" class="btn-submit" style="width: auto; padding: 11px 26px;">
+                        <span>📈</span> Save Measurement
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Growth Records History Table -->
+        <div class="table-card">
+            <div class="table-header-title">
+                <h4>
+                    <span>📋</span>
+                    <span>Growth Measurement History ({{ records|length }} Entries)</span>
+                </h4>
+            </div>
+
+            <div class="table-responsive">
+                {% if records %}
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Age (Months)</th>
+                                <th>Weight (kg)</th>
+                                <th>Height (cm)</th>
+                                <th>Head Circ. (cm)</th>
+                                <th>BMI</th>
+                                <th>WHO Status</th>
+                                <th>Notes</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in records %}
+                                <tr>
+                                    <td><strong>{{ r.record_date }}</strong></td>
+                                    <td>{{ r.age_months }} mos</td>
+                                    <td><strong>{{ r.weight_kg }} kg</strong></td>
+                                    <td>{{ r.height_cm }} cm</td>
+                                    <td>{{ r.head_circumference_cm ~ ' cm' if r.head_circumference_cm else '—' }}</td>
+                                    <td>{{ r.bmi if r.bmi else '—' }}</td>
+                                    <td>
+                                        <span class="badge-status completed" style="font-size: 11px;">
+                                            {{ r.growth_status or 'Healthy Weight' }}
+                                        </span>
+                                    </td>
+                                    <td style="max-width: 180px; font-size: 12px; color: var(--text-muted);">
+                                        {{ r.notes or '—' }}
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('delete_growth', record_id=r.id) }}" onsubmit="return confirm('Remove this measurement record?');">
+                                            <input type="hidden" name="child_id" value="{{ selected_child.id }}">
+                                            <button type="submit" class="btn-action-sm btn-toggle-undo" title="Delete record">
+                                                <span>🗑️</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div style="padding: 32px 20px; text-align: center; color: var(--text-muted);">
+                        <span style="font-size: 32px; display: block; margin-bottom: 8px;">📊</span>
+                        <p style="font-weight: 600;">No growth records logged yet for {{ selected_child.name }}.</p>
+                        <p style="font-size: 12.5px;">Log your child's first weight and height above to track their percentile curves.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Developmental Milestones Section -->
+        <div class="milestones-container">
+            <h3>
+                <span>🎯</span>
+                <span>Pediatric Developmental Milestones Checklist</span>
+            </h3>
+            <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 18px;">
+                Track your baby's physical, cognitive, and social milestones against standard pediatric development markers.
+            </p>
+
+            <!-- 0 - 3 Months -->
+            <div class="milestone-age-band">
+                <h4>
+                    <span>🍼</span> 0 – 3 Months (Newborn &amp; Early Infancy)
+                </h4>
+                <div class="milestone-items-list">
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 3 %}checked{% endif %}>
+                        <span>Lifts head &amp; chest briefly during tummy time</span>
+                    </label>
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 2 %}checked{% endif %}>
+                        <span>Smiles responsively to parents' voices &amp; faces</span>
+                    </label>
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 3 %}checked{% endif %}>
+                        <span>Follows moving toys &amp; faces with eyes</span>
+                    </label>
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 2 %}checked{% endif %}>
+                        <span>Opens and closes hands into fists</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 4 - 6 Months -->
+            <div class="milestone-age-band">
+                <h4>
+                    <span>🧸</span> 4 – 6 Months (Sitting &amp; Exploring)
+                </h4>
+                <div class="milestone-items-list">
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 6 %}checked{% endif %}>
+                        <span>Rolls over from stomach to back</span>
+                    </label>
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 6 %}checked{% endif %}>
+                        <span>Sits with minimal hands or pillow support</span>
+                    </label>
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 5 %}checked{% endif %}>
+                        <span>Reaches out for toys with one hand</span>
+                    </label>
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 5 %}checked{% endif %}>
+                        <span>Babbles expressive vowel sounds (ah, eh, oh)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 7 - 12 Months -->
+            <div class="milestone-age-band">
+                <h4>
+                    <span>👣</span> 7 – 12 Months (Crawling &amp; First Words)
+                </h4>
+                <div class="milestone-items-list">
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 9 %}checked{% endif %}>
+                        <span>Crawls on hands and knees confidently</span>
+                    </label>
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 8 %}checked{% endif %}>
+                        <span>Sits independently without support</span>
+                    </label>
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 10 %}checked{% endif %}>
+                        <span>Pulls up to standing holding furniture</span>
+                    </label>
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 12 %}checked{% endif %}>
+                        <span>Says first distinct words like "Mama" or "Dada"</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 1 - 2 Years -->
+            <div class="milestone-age-band">
+                <h4>
+                    <span>🏃</span> 1 – 2 Years (Toddler Independence)
+                </h4>
+                <div class="milestone-items-list">
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 15 %}checked{% endif %}>
+                        <span>Walks steadily without holding on</span>
+                    </label>
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 18 %}checked{% endif %}>
+                        <span>Drinks from an open cup and uses a baby spoon</span>
+                    </label>
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 20 %}checked{% endif %}>
+                        <span>Stacks a tower of 3 to 4 toy blocks</span>
+                    </label>
+                    <label class="milestone-item">
+                        <input type="checkbox" {% if current_age_months >= 24 %}checked{% endif %}>
+                        <span>Combines 2-word phrases ("want milk", "big ball")</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
