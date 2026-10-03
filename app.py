@@ -206,6 +206,72 @@ def forgot_password():
         flash(f'A password reset link has been sent to {email}.', 'success')
     return redirect(url_for('login_page'))
 
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def parent_profile():
+    user = db_manager.get_user_by_id(session['user_id'])
+    if not user:
+        session.clear()
+        flash('Session expired. Please log in again.', 'warning')
+        return redirect(url_for('login_page'))
+
+    db_mode = "SQLite (Local Mode)" if db_manager.use_sqlite else "MySQL Database"
+
+    if request.method == 'POST':
+        full_name = request.form.get('full_name', '').strip()
+        phone = request.form.get('phone', '').strip()
+        current_password = request.form.get('current_password', '')
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        if not full_name:
+            flash('Full name is required.', 'error')
+            return render_template('profile.html', user=user, db_mode=db_mode)
+
+        new_password_hash = None
+        # If user intends to change password
+        if current_password or new_password or confirm_password:
+            if not current_password:
+                flash('Please enter your current password to change password.', 'error')
+                return render_template('profile.html', user=user, db_mode=db_mode)
+
+            if not check_password_hash(user['password_hash'], current_password):
+                flash('Current password is incorrect.', 'error')
+                return render_template('profile.html', user=user, db_mode=db_mode)
+
+            if not new_password or len(new_password) < 6:
+                flash('New password must be at least 6 characters long.', 'error')
+                return render_template('profile.html', user=user, db_mode=db_mode)
+
+            if new_password != confirm_password:
+                flash('New passwords do not match. Please re-enter.', 'error')
+                return render_template('profile.html', user=user, db_mode=db_mode)
+
+            new_password_hash = generate_password_hash(new_password, method='pbkdf2:sha256')
+
+        try:
+            success = db_manager.update_user(
+                user_id=user['id'],
+                full_name=full_name,
+                phone=phone,
+                new_password_hash=new_password_hash
+            )
+
+            if success:
+                session['user_name'] = full_name
+                flash('Your profile details have been updated successfully! ✨', 'success')
+                return redirect(url_for('dashboard'))
+            else:
+                flash('No changes were made to your profile.', 'info')
+                return redirect(url_for('parent_profile'))
+
+        except Exception as e:
+            app.logger.error(f"Error updating user profile: {e}")
+            flash('Failed to update profile. Please try again.', 'error')
+            return render_template('profile.html', user=user, db_mode=db_mode)
+
+    return render_template('profile.html', user=user, db_mode=db_mode)
+
 # ----------------- DASHBOARD & CHILD MANAGEMENT ----------------- #
 
 @app.route('/dashboard')

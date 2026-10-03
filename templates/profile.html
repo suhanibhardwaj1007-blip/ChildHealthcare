@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile | LittleCare Child Healthcare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>">
+    <style>
+        .profile-page-container {
+            width: 100%;
+            max-width: 820px;
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            border: 1px solid rgba(252, 231, 243, 0.9);
+            padding: 36px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-header-card {
+            background: linear-gradient(135deg, #fdf2f8 0%, #fff1f6 50%, #fce7f3 100%);
+            border: 1.5px solid #fbcfe8;
+            border-radius: var(--radius-md);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .profile-user-group {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .profile-avatar-large {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: var(--primary-gradient);
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 18px rgba(236, 72, 153, 0.28);
+            border: 2px solid #ffffff;
+        }
+
+        .profile-meta h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+
+        .profile-meta p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .section-card {
+            background: #fdfdfd;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px 28px;
+            margin-bottom: 24px;
+        }
+
+        .section-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .section-card-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .password-info-box {
+            background: #fdf2f8;
+            border: 1px solid #fbcfe8;
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 18px;
+            font-size: 13px;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-back-nav {
+            padding: 9px 16px;
+            background: #ffffff;
+            color: var(--text-muted);
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            font-size: 13.5px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .btn-back-nav:hover {
+            background: #ffffff;
+            color: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.12);
+        }
+
+        .account-meta-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            border-radius: var(--radius-sm);
+            margin-top: 24px;
+            font-size: 12.5px;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .badge-readonly {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .profile-page-container {
+                padding: 24px 18px;
+            }
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .profile-header-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="profile-page-container">
+
+        <!-- App Navigation Header -->
+        <div class="app-header-nav">
+            <a href="{{ url_for('dashboard') }}" class="brand-nav-logo">
+                <div class="brand-nav-icon">👶</div>
+                <div class="brand-nav-text">
+                    <h2>LittleCare</h2>
+                    <span>Pediatric Portal</span>
+                </div>
+            </a>
+
+            <div class="nav-links-bar">
+                <a href="{{ url_for('dashboard') }}" class="nav-link-btn">
+                    <span>🏠</span> Dashboard
+                </a>
+                <a href="{{ url_for('vaccination_tracker') }}" class="nav-link-btn">
+                    <span>💉</span> Vaccination
+                </a>
+                <a href="{{ url_for('growth_tracker') }}" class="nav-link-btn">
+                    <span>📈</span> Growth
+                </a>
+                <a href="{{ url_for('appointments') }}" class="nav-link-btn">
+                    <span>🩺</span> Appointments
+                </a>
+                <a href="{{ url_for('nutrition_guide') }}" class="nav-link-btn">
+                    <span>🥗</span> Nutrition
+                </a>
+                <a href="{{ url_for('symptoms_guide') }}" class="nav-link-btn">
+                    <span>🩹</span> Symptoms
+                </a>
+            </div>
+
+            <div class="user-nav-actions">
+                <a href="{{ url_for('logout') }}" class="btn-logout" style="padding: 8px 14px; font-size: 13px;">
+                    <span>🚪</span> Sign Out
+                </a>
+            </div>
+        </div>
+
+        <!-- Header Profile Banner -->
+        <div class="profile-header-card">
+            <div class="profile-user-group">
+                <div class="profile-avatar-large">
+                    {{ user.full_name[0] if user.full_name else '👤' }}
+                </div>
+                <div class="profile-meta">
+                    <h2>{{ user.full_name }}</h2>
+                    <p>{{ user.email }} &bull; <span class="role-badge" style="margin-top: 0; padding: 2px 8px;">{% if user.role == 'doctor' %}👨‍⚕️ Pediatric Doctor{% else %}👨‍👩‍👧 Parent / Guardian{% endif %}</span></p>
+                </div>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="btn-back-nav">
+                <span>➔</span> Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span class="alert-icon">
+                                {% if category == 'success' %}🎉
+                                {% elif category == 'error' %}⚠️
+                                {% elif category == 'warning' %}🔔
+                                {% else %}ℹ️{% endif %}
+                            </span>
+                            <span class="alert-text">{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Profile Edit Form -->
+        <form method="POST" action="{{ url_for('parent_profile') }}">
+
+            <!-- SECTION 1: Personal Profile Details -->
+            <div class="section-card">
+                <div class="section-card-header">
+                    <h3 class="section-card-title">
+                        <span>👤</span> Personal Details
+                    </h3>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="input-group">
+                        <label for="full_name">Full Name <span style="color: var(--primary);">*</span></label>
+                        <input type="text" id="full_name" name="full_name" value="{{ user.full_name }}" placeholder="e.g. Dr. Sarah Jenkins" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="text" id="phone" name="phone" value="{{ user.phone or '' }}" placeholder="e.g. +1 555-019-2834 or 9876543210">
+                    </div>
+                </div>
+
+                <div class="form-grid-2" style="margin-top: 14px;">
+                    <div class="input-group">
+                        <label for="email">Email Address <span class="badge-readonly">Read-Only</span></label>
+                        <input type="email" id="email" value="{{ user.email }}" readonly disabled style="background-color: #f8fafc; color: #64748b; cursor: not-allowed;">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="role">Account Role</label>
+                        <input type="text" id="role" value="{{ user.role | capitalize }}" readonly disabled style="background-color: #f8fafc; color: #64748b; cursor: not-allowed;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Change Password (Optional) -->
+            <div class="section-card">
+                <div class="section-card-header">
+                    <h3 class="section-card-title">
+                        <span>🔒</span> Security &amp; Password
+                    </h3>
+                </div>
+
+                <div class="password-info-box">
+                    <span>💡</span>
+                    <span>Leave these password fields blank if you do not wish to change your current password.</span>
+                </div>
+
+                <div class="input-group" style="margin-bottom: 16px;">
+                    <label for="current_password">Current Password</label>
+                    <input type="password" id="current_password" name="current_password" placeholder="Enter your current password to authorize change">
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="input-group">
+                        <label for="new_password">New Password</label>
+                        <input type="password" id="new_password" name="new_password" placeholder="Minimum 6 characters">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="confirm_password">Confirm New Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-type new password">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Action Buttons -->
+            <div style="display: flex; gap: 14px; margin-top: 28px; flex-wrap: wrap;">
+                <button type="submit" class="btn-submit" style="flex: 2; min-width: 220px;">
+                    <span>✨</span>
+                    <span>Save Profile Changes</span>
+                </button>
+                <a href="{{ url_for('dashboard') }}" class="btn-back" style="flex: 1; min-width: 140px; text-align: center; justify-content: center;">
+                    Cancel
+                </a>
+            </div>
+
+            <!-- Account Metadata Footer -->
+            <div class="account-meta-footer">
+                <div>
+                    <span>📅 Member Since: <strong>{{ user.created_at[:10] if user.created_at else 'Active Account' }}</strong></span>
+                </div>
+                <div>
+                    <span>🗄️ Database: <strong style="color: var(--secondary);">{{ db_mode }}</strong></span>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+
+</body>
+</html>

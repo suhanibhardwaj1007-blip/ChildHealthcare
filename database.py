@@ -424,6 +424,33 @@ class DatabaseManager:
         finally:
             conn.close()
 
+    def update_user(self, user_id, full_name, phone=None, new_password_hash=None):
+        """Updates user profile details and optional password hash"""
+        conn = self.get_connection()
+        try:
+            if new_password_hash:
+                query_sqlite = "UPDATE users SET full_name = ?, phone = ?, password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
+                params_sqlite = (full_name.strip(), phone.strip() if phone else None, new_password_hash, user_id)
+                query_mysql = "UPDATE users SET full_name = %s, phone = %s, password_hash = %s WHERE id = %s"
+                params_mysql = (full_name.strip(), phone.strip() if phone else None, new_password_hash, user_id)
+            else:
+                query_sqlite = "UPDATE users SET full_name = ?, phone = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
+                params_sqlite = (full_name.strip(), phone.strip() if phone else None, user_id)
+                query_mysql = "UPDATE users SET full_name = %s, phone = %s WHERE id = %s"
+                params_mysql = (full_name.strip(), phone.strip() if phone else None, user_id)
+
+            if self.use_sqlite:
+                cursor = conn.cursor()
+                cursor.execute(query_sqlite, params_sqlite)
+                conn.commit()
+                return cursor.rowcount > 0
+            else:
+                with conn.cursor() as cursor:
+                    cursor.execute(query_mysql, params_mysql)
+                    return cursor.rowcount > 0
+        finally:
+            conn.close()
+
     # ----------------- CHILDREN METHODS ----------------- #
 
     def create_child(self, parent_id, name, dob, gender='male', blood_group=None, 

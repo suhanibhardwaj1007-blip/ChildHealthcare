@@ -402,6 +402,9 @@
             </div>
 
             <div class="user-nav-actions">
+                <a href="{{ url_for('parent_profile') }}" class="btn-back" style="padding: 8px 14px; font-size: 13px; color: var(--primary); border-color: var(--primary);">
+                    <span>👤</span> My Profile
+                </a>
                 <a href="{{ url_for('add_child') }}" class="btn-add-child-header" style="padding: 8px 14px; font-size: 13px;">
                     <span>➕</span> Add Child
                 </a>
@@ -562,7 +565,12 @@
 
         <!-- 3. USER PROFILE INFORMATION CARD -->
         <div class="profile-details">
-            <h3>👤 Account Information</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin-bottom: 0;">👤 Account Information</h3>
+                <a href="{{ url_for('parent_profile') }}" class="btn-back" style="padding: 7px 14px; font-size: 13px; color: var(--primary); border-color: var(--primary);">
+                    <span>✏️</span> Edit Profile
+                </a>
+            </div>
             <div class="detail-row">
                 <span class="detail-label">Full Name:</span>
                 <span class="detail-val">{{ user.full_name }}</span>
