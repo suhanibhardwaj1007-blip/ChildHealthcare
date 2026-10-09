@@ -8,6 +8,7 @@ class ChildHealthcareAuthTestCase(unittest.TestCase):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
         self.client = app.test_client()
+        db_manager._init_sqlite()
         self.test_email = f"sarah.jenkins.{int(time.time()*1000)}@example.com"
 
     def test_01_login_page_renders(self):
@@ -134,6 +135,131 @@ class ChildHealthcareAuthTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'signed out successfully', response.data)
         print("PASS: Logout redirects and flashes English goodbye message.")
+
+    def test_09_profile_page_renders(self):
+        """Test GET /profile renders parent profile with English branding and settled tables"""
+        self.client.post('/register', data={
+            'full_name': 'Dr. Sarah Jenkins',
+            'email': self.test_email,
+            'password': 'SecurePassword123',
+            'confirm_password': 'SecurePassword123',
+            'role': 'doctor'
+        }, follow_redirects=True)
+
+        response = self.client.get('/profile')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Sarah Jenkins', response.data)
+        self.assertIn(b'Account Information Table', response.data)
+        self.assertIn(b'Personal &amp; Contact Details', response.data)
+        self.assertIn(b'Security &amp; Password Settings', response.data)
+        print("PASS: Profile page renders with settled table and full English branding.")
+
+    def test_10_update_profile_name_and_phone(self):
+        """Test POST /profile updates parent name and phone number successfully"""
+        self.client.post('/register', data={
+            'full_name': 'Dr. Sarah Jenkins',
+            'email': self.test_email,
+            'phone': '1111111111',
+            'password': 'SecurePassword123',
+            'confirm_password': 'SecurePassword123',
+            'role': 'doctor'
+        }, follow_redirects=True)
+
+        payload = {
+            'full_name': 'Dr. Sarah Jenkins MD',
+            'phone': '+1 555-987-6543'
+        }
+        response = self.client.post('/profile', data=payload, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'updated successfully', response.data)
+        self.assertIn(b'Sarah Jenkins MD', response.data)
+
+        # Check DB update
+        user = db_manager.get_user_by_email(self.test_email)
+        self.assertEqual(user['full_name'], 'Dr. Sarah Jenkins MD')
+        self.assertEqual(user['phone'], '+1 555-987-6543')
+        print("PASS: Profile name and phone updated successfully in database and session.")
+
+    def test_11_update_profile_password_success(self):
+        """Test updating password with valid current password"""
+        self.client.post('/register', data={
+            'full_name': 'Dr. Sarah Jenkins',
+            'email': self.test_email,
+            'password': 'OldPassword123',
+            'confirm_password': 'OldPassword123',
+            'role': 'doctor'
+        }, follow_redirects=True)
+
+        payload = {
+            'full_name': 'Dr. Sarah Jenkins',
+            'phone': '1111111111',
+            'current_password': 'OldPassword123',
+            'new_password': 'NewSecurePassword456',
+            'confirm_password': 'NewSecurePassword456'
+        }
+        response = self.client.post('/profile', data=payload, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'updated successfully', response.data)
+
+        # Test login with new password
+        self.client.get('/logout', follow_redirects=True)
+        login_res = self.client.post('/login', data={
+            'email': self.test_email,
+            'password': 'NewSecurePassword456'
+        }, follow_redirects=True)
+        self.assertEqual(login_res.status_code, 200)
+        self.assertIn(b'Welcome back', login_res.data)
+        print("PASS: Password changed and verified via re-login.")
+
+    def test_12_update_profile_invalid_current_password_rejected(self):
+        """Test password update rejected when current password is wrong"""
+        self.client.post('/register', data={
+            'full_name': 'Dr. Sarah Jenkins',
+            'email': self.test_email,
+            'password': 'OldPassword123',
+            'confirm_password': 'OldPassword123',
+            'role': 'doctor'
+        }, follow_redirects=True)
+
+        payload = {
+            'full_name': 'Dr. Sarah Jenkins',
+            'current_password': 'WrongPassword999',
+            'new_password': 'NewSecurePassword456',
+            'confirm_password': 'NewSecurePassword456'
+        }
+        response = self.client.post('/profile', data=payload, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Current password is incorrect', response.data)
+        print("PASS: Invalid current password correctly rejected.")
+
+    def test_13_update_profile_password_mismatch_rejected(self):
+        """Test password update rejected when new passwords do not match"""
+        self.client.post('/register', data={
+            'full_name': 'Dr. Sarah Jenkins',
+            'email': self.test_email,
+            'password': 'OldPassword123',
+            'confirm_password': 'OldPassword123',
+            'role': 'doctor'
+        }, follow_redirects=True)
+
+        payload = {
+            'full_name': 'Dr. Sarah Jenkins',
+            'current_password': 'OldPassword123',
+            'new_password': 'NewSecurePassword456',
+            'confirm_password': 'DifferentPassword789'
+        }
+        response = self.client.post('/profile', data=payload, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'New passwords do not match', response.data)
+        print("PASS: Password mismatch correctly rejected.")
+
+    def test_14_profile_unauthorized_access_redirects(self):
+        """Test GET /profile without login redirects to /login"""
+        self.client.get('/logout', follow_redirects=True)
+        response = self.client.get('/profile', follow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login', response.headers['Location'])
+        print("PASS: Unauthorized access to profile properly redirected.")
 
 if __name__ == '__main__':
     unittest.main()

@@ -9,6 +9,7 @@ class ChildProfileTestCase(unittest.TestCase):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
         self.client = app.test_client()
+        db_manager._init_sqlite()
 
         # Register a test parent
         self.parent_email = f"parent.test.{int(time.time()*1000)}@example.com"

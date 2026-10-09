@@ -118,6 +118,12 @@
             </div>
 
             <div class="user-nav-actions">
+                <a href="{{ url_for('parent_profile') }}" class="btn-nav-profile">
+                    <span>👤</span> My Profile
+                </a>
+                <a href="{{ url_for('add_child') }}" class="btn-add-child-header">
+                    <span>➕</span> Add Child
+                </a>
                 <a href="{{ url_for('logout') }}" class="btn-logout">
                     <span>🚪</span> Sign Out
                 </a>

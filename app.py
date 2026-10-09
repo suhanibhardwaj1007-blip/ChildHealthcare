@@ -216,6 +216,9 @@ def parent_profile():
         return redirect(url_for('login_page'))
 
     db_mode = "SQLite (Local Mode)" if db_manager.use_sqlite else "MySQL Database"
+    children = db_manager.get_children_by_parent(user['id'])
+    for child in children:
+        child['display_age'] = calculate_child_age(child['dob'])
 
     if request.method == 'POST':
         full_name = request.form.get('full_name', '').strip()
@@ -226,26 +229,26 @@ def parent_profile():
 
         if not full_name:
             flash('Full name is required.', 'error')
-            return render_template('profile.html', user=user, db_mode=db_mode)
+            return render_template('profile.html', user=user, db_mode=db_mode, children=children)
 
         new_password_hash = None
         # If user intends to change password
         if current_password or new_password or confirm_password:
             if not current_password:
                 flash('Please enter your current password to change password.', 'error')
-                return render_template('profile.html', user=user, db_mode=db_mode)
+                return render_template('profile.html', user=user, db_mode=db_mode, children=children)
 
             if not check_password_hash(user['password_hash'], current_password):
                 flash('Current password is incorrect.', 'error')
-                return render_template('profile.html', user=user, db_mode=db_mode)
+                return render_template('profile.html', user=user, db_mode=db_mode, children=children)
 
             if not new_password or len(new_password) < 6:
                 flash('New password must be at least 6 characters long.', 'error')
-                return render_template('profile.html', user=user, db_mode=db_mode)
+                return render_template('profile.html', user=user, db_mode=db_mode, children=children)
 
             if new_password != confirm_password:
                 flash('New passwords do not match. Please re-enter.', 'error')
-                return render_template('profile.html', user=user, db_mode=db_mode)
+                return render_template('profile.html', user=user, db_mode=db_mode, children=children)
 
             new_password_hash = generate_password_hash(new_password, method='pbkdf2:sha256')
 
@@ -268,9 +271,9 @@ def parent_profile():
         except Exception as e:
             app.logger.error(f"Error updating user profile: {e}")
             flash('Failed to update profile. Please try again.', 'error')
-            return render_template('profile.html', user=user, db_mode=db_mode)
+            return render_template('profile.html', user=user, db_mode=db_mode, children=children)
 
-    return render_template('profile.html', user=user, db_mode=db_mode)
+    return render_template('profile.html', user=user, db_mode=db_mode, children=children)
 
 # ----------------- DASHBOARD & CHILD MANAGEMENT ----------------- #
 

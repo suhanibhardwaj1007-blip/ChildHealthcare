@@ -25,6 +25,8 @@ class LittleCareAllModulesTest(unittest.TestCase):
                 os.remove(self.temp_db_path)
             except Exception:
                 pass
+        db_manager.sqlite_file = os.path.join(os.path.dirname(__file__), 'child_healthcare.db')
+        db_manager._init_sqlite()
 
     # Helper: Register & Login
     def register_and_login(self, email="parent1@example.com", password="password123", name="Parent One"):
